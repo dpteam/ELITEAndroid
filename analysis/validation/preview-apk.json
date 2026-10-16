@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "apk_sha256": "8f56c3c4bc89f7d7230604a860383d65718ae73bc3211722b62579c4a41fd620",
-  "apk_bytes": 828554,
+  "apk_sha256": "59944a641b83fb347295255816b14157831e9e19ca018e492aa50f849e02daa1",
+  "apk_bytes": 754669,
   "application": "elite.preview \u2014 separate mesh test, not the game",
   "libraries": {
     "lib/arm64-v8a/libelite_core.so": {
@@ -10,7 +10,7 @@
       "elf_class": 64,
       "machine": 183,
       "textrel": false,
-      "zip_data_offset": 147456,
+      "zip_data_offset": 32768,
       "segments": [
         {
           "flags": 5,
@@ -32,7 +32,7 @@
       "elf_class": 64,
       "machine": 183,
       "textrel": false,
-      "zip_data_offset": 16384,
+      "zip_data_offset": 212992,
       "segments": [
         {
           "flags": 5,
@@ -50,7 +50,7 @@
       "elf_class": 32,
       "machine": 40,
       "textrel": false,
-      "zip_data_offset": 327680,
+      "zip_data_offset": 229376,
       "segments": [
         {
           "flags": 5,
@@ -72,7 +72,7 @@
       "elf_class": 32,
       "machine": 40,
       "textrel": false,
-      "zip_data_offset": 32768,
+      "zip_data_offset": 360448,
       "segments": [
         {
           "flags": 5,
@@ -90,7 +90,7 @@
       "elf_class": 32,
       "machine": 3,
       "textrel": false,
-      "zip_data_offset": 458752,
+      "zip_data_offset": 376832,
       "segments": [
         {
           "flags": 5,
@@ -112,7 +112,7 @@
       "elf_class": 32,
       "machine": 3,
       "textrel": false,
-      "zip_data_offset": 49152,
+      "zip_data_offset": 524288,
       "segments": [
         {
           "flags": 5,
@@ -130,7 +130,7 @@
       "elf_class": 64,
       "machine": 62,
       "textrel": false,
-      "zip_data_offset": 655360,
+      "zip_data_offset": 540672,
       "segments": [
         {
           "flags": 5,
@@ -152,7 +152,7 @@
       "elf_class": 64,
       "machine": 62,
       "textrel": false,
-      "zip_data_offset": 65536,
+      "zip_data_offset": 720896,
       "segments": [
         {
           "flags": 5,
@@ -167,6 +167,6 @@
   },
   "limitations": [
     "Signature verification belongs to apksigner; this script checks archive/ELF layout only.",
-    "No installation, JNI execution, Android lifecycle or GPU rendering was observed."
+    "This static check does not observe installation, JNI execution, Android lifecycle or GPU rendering; see the separate device report."
   ]
 }

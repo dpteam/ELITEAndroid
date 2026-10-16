@@ -1,6 +1,6 @@
 {
   "original_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
-  "packaged_apk_sha256": "8f56c3c4bc89f7d7230604a860383d65718ae73bc3211722b62579c4a41fd620",
+  "packaged_apk_sha256": "59944a641b83fb347295255816b14157831e9e19ca018e492aa50f849e02daa1",
   "random_seed": "0xe117f",
   "samples": 300,
   "control_ticks_per_profile": 200,

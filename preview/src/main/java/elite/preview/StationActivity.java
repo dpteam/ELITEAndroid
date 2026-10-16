@@ -2,6 +2,7 @@ package elite.preview;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -32,6 +33,7 @@ public final class StationActivity extends Activity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         try {
             System.loadLibrary("elite_preview");
             byte[] restored = savedInstanceState == null ? null : savedInstanceState.getByteArray("station-test-state");
@@ -45,19 +47,20 @@ public final class StationActivity extends Activity {
         }
         ScrollView scroll = new ScrollView(this);
         LinearLayout panel = new LinearLayout(this);
-        panel.setPadding(16, 16, 16, 16);
+        panel.setPadding(4, 4, 4, 4);
         panel.setOrientation(LinearLayout.VERTICAL);
         scroll.addView(panel);
-        TextView warning = label("STATION CORE TEST — NOT THE COMPLETE GAME\n"
-            + "New UI; native market/commander rules. No launch, hyperspace, missions or disk saves.");
+        TextView warning = label("STATION TEST · No launch, missions or disk saves");
         warning.setTextColor(0xffffd86b);
         panel.addView(warning);
         summary = label(""); panel.addView(summary);
         LinearLayout actions = new LinearLayout(this);
         Button reset = new Button(this); reset.setText("New test commander");
+        compact(reset);
         reset.setOnClickListener(v -> { state = NativeStation.reset(); refresh(); receipt.setText("Reset to default commander"); });
         actions.addView(reset);
         Button close = new Button(this); close.setText("Back to flight/model test");
+        compact(close);
         close.setOnClickListener(v -> finish()); actions.addView(close);
         panel.addView(actions);
         receipt = label("One unit per transaction. Flight test has independent state.");
@@ -76,8 +79,10 @@ public final class StationActivity extends Activity {
             cargo[i] = label(""); row.addView(cargo[i]);
             final int item = i;
             Button buy = new Button(this); buy.setText("+1");
+            compact(buy);
             buy.setOnClickListener(v -> transact(item, true)); row.addView(buy);
             Button sell = new Button(this); sell.setText("−1");
+            compact(sell);
             sell.setOnClickListener(v -> transact(item, false)); row.addView(sell);
             table.addView(row);
         }
@@ -117,7 +122,15 @@ public final class StationActivity extends Activity {
     }
     private TextView label(String text) {
         TextView view = new TextView(this); view.setText(text);
-        view.setPadding(8, 8, 8, 8); return view;
+        view.setTextSize(11);
+        view.setPadding(4, 4, 4, 4); return view;
+    }
+    private void compact(Button button) {
+        button.setTextSize(10); button.setAllCaps(false);
+        button.setMinimumWidth(0); button.setMinWidth(0);
+        int height = (int)(32 * getResources().getDisplayMetrics().density);
+        button.setMinimumHeight(height); button.setMinHeight(height);
+        button.setPadding(6, 0, 6, 0);
     }
     private ByteBuffer buffer() { return ByteBuffer.wrap(state).order(ByteOrder.LITTLE_ENDIAN); }
     private static boolean valid(byte[] state) {

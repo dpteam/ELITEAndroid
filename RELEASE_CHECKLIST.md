@@ -8,13 +8,15 @@ estimate. A successful APK build is not evidence of a working game.
 | 1. Android project / reproducible toolchain | Foundation ready | Gradle, SDK/NDK and prototype APK builds work. |
 | 2. Artifact analysis / source identification | Foundation ready | DEX recovery, native inventories, close AGB source, geometry match, bounded behavioral replay. This does not mean all native code has been reconstructed. |
 | 3. Full rebuilt gameplay core | Partial | Math, movement/controls, seed, ship data, commander/system/market math work on four ABIs. Original universe, combat/AI and full game-state systems are not connected. |
-| 4. Rebuilt graphics | Partial | Mesh preparation validated; separate GLES2/JNI viewer builds. Device GPU testing, sprites, HUD, effects and integration remain. |
+| 4. Rebuilt graphics | Partial | Mesh preparation validated; GLES2/JNI viewer observed on Android 13 ARM64. Wider GPU/model coverage, sprites, HUD, effects and integration remain. |
 | 5. Connected game loop / menus / controls | Not connected | Flight and Station test screens exist in `preview` with independent states; they are not a connected docked/flight game. |
-| 6. Saves / sound / Android lifecycle | Not validated | Preserve original saves, connect sound callbacks, implement safe pause/resume and context recreation. |
-| 7. Modern Android runtime matrix | Not performed | Test actual Android 11/13+ and 64-bit-only installs, JNI/GPU behavior and gameplay. |
+| 6. Saves / sound / Android lifecycle | Partial: test harness only | Flight and Station Bundle restoration passed background process death on Android 13. Original saves, sound and full-game lifecycle remain unimplemented/unvalidated. |
+| 7. Modern Android runtime matrix | Partial: one device | Android 13 ARM64 preview install/JNI/GPU/input passed. Android 11, other versions/GPUs, 64-bit-only devices, other runtime ABIs and actual gameplay remain. |
 | 8. Release packaging / regression | Not ready | Complete gameplay tests, all required native ABIs, appropriate signing, licensing review and release documentation. |
 
-Current summary: **2 foundation gates ready, 2 in progress, 4 not completed**.
+Current summary: **2 foundation gates ready, 4 partial, 2 not connected/ready**.
+Partial gates are not release passes; see `analysis/validation/device-android13.md`
+for the bounded device smoke test.
 The largest work is still integrating the full rebuilt game, not adding ABI
 directory names. No credible release-date estimate is established yet.
 

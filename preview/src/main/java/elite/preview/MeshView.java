@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.os.Bundle;
 import android.view.MotionEvent;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,8 +22,10 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
     interface StatusListener { void changed(String status); }
     volatile StatusListener statusListener;
     private String lastStatus = "";
-    private byte[] flightState;
-    private int flightModel = -1;
+    // Published snapshots are immutable: JNI creates a fresh byte array per
+    // step, so the UI thread may safely clone the latest saved-state snapshot.
+    private volatile byte[] flightState;
+    private volatile int flightModel = -1;
     private volatile boolean resetRequested;
     private volatile float flightRoll, flightPitch;
     private boolean previousFlight;
@@ -30,7 +33,7 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
     private String flightFailure;
     private volatile float dragYaw, dragPitch;
     private float lastX, lastY;
-    private float yaw = 0.5f;
+    private volatile float yaw = 0.5f;
     private long lastTime;
     private int program, position, colour, projection;
     private final float[] matrix = new float[16];
@@ -57,6 +60,39 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
     void clearFlightInput() {
         flightRoll = flightPitch = 0;
         queueEvent(() -> { lastTime = 0; tickAccumulator = 0; });
+    }
+
+    Bundle saveTestState() {
+        Bundle state = new Bundle();
+        state.putInt("model", model); state.putInt("flags", flags);
+        state.putBoolean("flight", flightMode); state.putBoolean("rotating", rotating);
+        state.putInt("throttle", throttleTarget);
+        state.putFloat("yaw", yaw); state.putFloat("dragYaw", dragYaw); state.putFloat("dragPitch", dragPitch);
+        byte[] snapshot = flightState;
+        if (snapshot != null && flightModel == model) state.putByteArray("scene", snapshot.clone());
+        return state;
+    }
+
+    void restoreTestState(Bundle state, int models) {
+        if (state == null) return;
+        model = clamp(state.getInt("model", model), 0, models - 1);
+        int savedFlags = state.getInt("flags", 1);
+        flags = savedFlags == 0 || savedFlags == 1 || savedFlags == 3 ? savedFlags : 1;
+        flightMode = state.getBoolean("flight", false);
+        rotating = state.getBoolean("rotating", true);
+        throttleTarget = clamp(state.getInt("throttle", 8), 1, 36);
+        yaw = state.getFloat("yaw", .5f);
+        dragYaw = state.getFloat("dragYaw", 0); dragPitch = state.getFloat("dragPitch", 0);
+        byte[] saved = state.getByteArray("scene");
+        final byte[] snapshot = saved != null && saved.length == 912
+            && readInt(saved, 0) == 0x45464c54 && readInt(saved, 4) == 1
+            && readInt(saved, 8) == model ? saved.clone() : null;
+        queueEvent(() -> {
+            flightState = snapshot;
+            flightModel = snapshot == null ? -1 : model;
+            previousFlight = snapshot != null && flightMode;
+            lastTime = 0; tickAccumulator = 0;
+        });
     }
 
     @Override public boolean onTouchEvent(MotionEvent event) {
@@ -180,6 +216,13 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
                 + "Mesh status " + frame[1] + " (culled/distant/unsupported/invalid)");
             return;
         }
+        int submitted = MeshPacket.submittedVertices(frame);
+        // A valid model can have no visible faces. Binding colour at position 3
+        // after flip() on an empty buffer crashed the GL thread on Android 13.
+        if (submitted == 0) {
+            report((flight ? flightStatus() : "GLES2") + " · no visible mesh commands");
+            return;
+        }
         int vertices = frame[2], commands = frame[3], cursor = 4 + vertices * 3;
         buffer.clear();
         int[] counts = new int[commands];
@@ -211,7 +254,7 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glEnableVertexAttribArray(position); GLES20.glEnableVertexAttribArray(colour);
         int first = 0;
         for (int count : counts) {
-            int primitive = count == 2 ? GLES20.GL_LINES : GLES20.GL_TRIANGLE_FAN;
+            int primitive = count == 1 ? GLES20.GL_POINTS : count == 2 ? GLES20.GL_LINES : GLES20.GL_TRIANGLE_FAN;
             GLES20.glDrawArrays(primitive, first, count);
             first += count;
         }
@@ -232,6 +275,7 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
             ++count;
         }
         buffer.flip();
+        if (count == 0) return;
         GLES20.glUseProgram(program);
         GLES20.glUniformMatrix4fv(projection, 1, false, matrix, 0);
         buffer.position(0);

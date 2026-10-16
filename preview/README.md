@@ -28,6 +28,12 @@ no access to the original game's private saves.
   commander/system/market math: Lave data, credits, cargo, prices, stock and
   one-unit buy/sell. It has independent in-memory state from the Flight scene;
   switching screens is **not** docking/launching in a connected universe.
+- Compact fullscreen panels support the tested 480x320 landscape display.
+  Throttle controls are shown only in Flight. Both Activities keep the display
+  awake only while visible; no global sleep or lock-screen settings are changed.
+- Saved-instance Bundles preserve the ephemeral Flight scene/settings and
+  Station snapshot across Activity/process recreation. This is **not disk
+  saving**, nor a guarantee of recovery after force-stop, reboot or task removal.
 
 ## Build
 
@@ -45,7 +51,7 @@ Optional install on a connected, explicitly selected test device:
 
 ```text
 adb -s DEVICE_SERIAL install -r preview/build/outputs/apk/debug/preview-debug.apk
-adb -s DEVICE_SERIAL shell am start -n elite.preview/.MeshActivity
+adb -s DEVICE_SERIAL shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n elite.preview/.MeshActivity
 ```
 
 Do not mistake this for a release of the game. There is no complete flight
@@ -79,10 +85,30 @@ missions, travel, equipment, launch/docking or complete station gameplay.
 - SDK `zipalign -c -P 16` passed; static packaged-library checks passed for all
   8 ELF files. See `analysis/validation/preview-apk.json`.
 
-**Not checked yet:** real Android install/start, JNI calls on ART, GLES shader
-compilation on a device, GPU output, touch behavior, and pause/resume/context
-recreation. The software PNGs under `build/mesh/` are offline visualizations,
-not screenshots or proof of Android execution.
+**Device smoke test passed:** Android 13 / API 33, E5, ARM64, 480x320
+landscape. Real ART/JNI calls, GLES2 shader compilation/output, three model
+modes, steering/throttle, pause/reset, Station transactions and background
+process-death restoration were observed. The final paused Flight screenshots
+before/after process recreation are byte-identical. See
+[`../analysis/validation/device-android13.md`](../analysis/validation/device-android13.md)
+for APK identity, observations and limitations.
+
+**Not checked yet:** other Android versions/GPUs, 64-bit-only devices, actual
+ARM32/x86/x86_64 runtime execution, exhaustive on-device model/mode coverage,
+long sessions, full-game lifecycle, original saves/audio and 16KiB-page devices.
+The software PNGs under `build/mesh/` remain offline visualizations, not phone
+screenshots; actual phone captures are under ignored `build/device-test/`.
+
+The empty-command regression also runs without Android on the host JVM:
+
+```text
+javac --release 8 -d build/java-tests preview/src/main/java/elite/preview/MeshPacket.java preview/tests/MeshPacketTest.java
+java -cp build/java-tests elite.preview.MeshPacketTest
+```
+
+It checks empty/fully culled packets, one-point/line commands and malformed
+length/count/index/colour bounds. GLES submission skips empty mesh/star buffers
+instead of setting a colour-pointer position beyond the buffer limit.
 
 Reproduce exact packaged-library comparisons with Python and Unicorn 2.1.4:
 

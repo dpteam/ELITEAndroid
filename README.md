@@ -42,7 +42,10 @@ Output: `preview/build/outputs/apk/debug/preview-debug.apk`. See
 [`preview/README.md`](preview/README.md) and
 [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for the exact validation boundary
 and remaining release work. The APK has passed build, signature and static
-alignment checks; Android GPU execution has not yet been observed.
+alignment checks, plus an ARM64 runtime smoke test on an Android 13 E5 phone:
+GLES2 models, Flight controls, Station trades and saved-instance restoration.
+See [`analysis/validation/device-android13.md`](analysis/validation/device-android13.md).
+Other Android versions and device ABIs have not been runtime-tested.
 
 ## ABI limitation
 

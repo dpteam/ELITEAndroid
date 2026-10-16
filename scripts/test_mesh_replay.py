@@ -120,7 +120,7 @@ def run(apk, build, samples, output, packaged_apk=None):
         'limitations': ['polygon3d and platform_set_line_color are intercepted at the rendering boundary; GLES is not invoked.',
             'No lasers, explosions, distant-object flicker, sprites, HUD or gameplay-state changes are tested.',
             'The port explicitly rejects unsupported effects and degenerate matrices.',
-            'Actual Android GPU rendering and lifecycle still need device/emulator testing.']}
+            'This replay does not execute Android GPU rendering or lifecycle; see the separate device report for bounded runtime observations.']}
     for abi in abis:
         lib = Replay(sources[abi], memory_imports=True)
         checks = Counter()

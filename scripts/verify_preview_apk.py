@@ -64,7 +64,7 @@ def verify(path, output):
     report = {'status': 'passed', 'apk_sha256': hashlib.sha256(raw).hexdigest(), 'apk_bytes': len(raw),
         'application': 'elite.preview — separate mesh test, not the game', 'libraries': entries,
         'limitations': ['Signature verification belongs to apksigner; this script checks archive/ELF layout only.',
-            'No installation, JNI execution, Android lifecycle or GPU rendering was observed.']}
+            'This static check does not observe installation, JNI execution, Android lifecycle or GPU rendering; see the separate device report.']}
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + '\n')
     print(f'PASS: {len(entries)} correctly labelled, uncompressed, 16KiB-aligned native libraries')

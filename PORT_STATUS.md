@@ -25,7 +25,8 @@
   a test harness, not the connected Elite game loop.
 - The Flight preview adds hold/drag steering, a throttle slider, pause/reset,
   synthetic reference points and numeric state readouts. Its new 30Hz test
-  scheduler and UI have not been validated on an Android runtime/device.
+   scheduler and UI passed a bounded Android 13 ARM64 device smoke test; this
+   does not validate the original full-game scheduler or HUD.
 - Added a commander/navigation/market subset and a separate Station screen in
   `elite.preview`: current system data, credit balance, cargo and one-unit
   transactions. It is not the original station UI or a connected game state.
@@ -34,13 +35,22 @@
 - Station validation covers all 2048 economy/market-random combinations,
   256 systems in the first galaxy, nearest-system searches and sampled original
   trade-wrapper state changes on four ABIs. See station replay reports.
+- Installed and ran `elite.preview` on an Android 13 E5 phone using ARM64
+  libraries. Confirmed three mesh modes, ADB touch steering/throttle, pause,
+  reset, Food trades, full-hold/no-stock rejection and process-death restoration.
+- Fixed an on-device empty draw-buffer crash and added a host-JVM packet
+  regression test. Compacted both test screens for the 480x320 landscape display.
+- Added Flight Bundle restoration for scene, model, mode, pause and throttle;
+  KEEP_SCREEN_ON applies only while each test Activity is visible.
 
 ## Separate graphics-test APK
 
 `preview/build/outputs/apk/debug/preview-debug.apk` (`elite.preview`) contains
 rebuilt ARMv7/ARM64/x86/x86_64 libraries. It is a model viewer, **not the game**.
-Build, signature and static ELF/ZIP alignment checks passed. Android GPU/JNI
-runtime testing has not been performed. Full limitations are listed in
+Build, signature and static ELF/ZIP alignment checks passed. Android 13 ARM64
+GPU/JNI smoke testing passed on one phone, including fresh process/context
+creation and saved-instance restoration. See `analysis/validation/device-android13.md`.
+This is not a 64-bit-only or multi-version/device matrix. Full limitations are listed in
 `preview/README.md` and `RELEASE_CHECKLIST.md`.
 
 ## Verified artifact

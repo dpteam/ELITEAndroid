@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -20,9 +21,11 @@ public final class MeshActivity extends Activity {
     private String[] models;
     private int selected;
     private int mode = 1;
+    private LinearLayout throttlePanel;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         try {
             System.loadLibrary("elite_preview");
             models = NativeMesh.modelNames();
@@ -36,22 +39,27 @@ public final class MeshActivity extends Activity {
         }
         FrameLayout root = new FrameLayout(this);
         mesh = new MeshView(this);
+        if (savedInstanceState != null) mesh.restoreTestState(savedInstanceState.getBundle("mesh-test"), models.length);
         mesh.statusListener = status -> {
             if (renderState != null) renderState.setText(status);
         };
         root.addView(mesh);
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(16, 8, 16, 8);
+        panel.setPadding(6, 2, 6, 2);
         panel.setBackgroundColor(0xb0000000);
         title = new TextView(this);
+        title.setTextSize(12);
         title.setTextColor(0xffffffff);
         panel.addView(title);
         TextView notice = new TextView(this);
-        notice.setText("TEST — NOT THE GAME · Drag: rotate / hold to steer in Flight · No collisions");
+        notice.setTextSize(10);
+        notice.setText("TEST, not full game · Drag to rotate / hold to steer");
         notice.setTextColor(0xffffd86b);
         panel.addView(notice);
         renderState = new TextView(this);
+        renderState.setTextSize(10);
+        renderState.setMaxLines(2);
         renderState.setTextColor(0xffb0d8ff);
         renderState.setText("GPU launch not yet observed on this device");
         panel.addView(renderState);
@@ -74,34 +82,48 @@ public final class MeshActivity extends Activity {
         HorizontalScrollView controlScroll = new HorizontalScrollView(this);
         controlScroll.addView(controls);
         panel.addView(controlScroll);
+        throttlePanel = new LinearLayout(this);
+        throttlePanel.setOrientation(LinearLayout.VERTICAL);
+        throttlePanel.setVisibility(View.GONE);
         TextView throttleLabel = new TextView(this);
-        throttleLabel.setText("Flight throttle target (Adder profile): 1…36");
+        throttleLabel.setTextSize(10);
+        throttleLabel.setText("Flight speed target: 1…36 · no collisions");
         throttleLabel.setTextColor(0xffb0d8ff);
-        panel.addView(throttleLabel);
+        throttlePanel.addView(throttleLabel);
         SeekBar throttle = new SeekBar(this);
         throttle.setMax(35);
-        throttle.setProgress(7);
+        throttle.setProgress(mesh.throttleTarget - 1);
         throttle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar bar, int value, boolean user) { mesh.throttleTarget = value + 1; }
             @Override public void onStartTrackingTouch(SeekBar bar) {}
             @Override public void onStopTrackingTouch(SeekBar bar) {}
         });
-        panel.addView(throttle);
+        throttlePanel.addView(throttle);
+        panel.addView(throttlePanel);
         FrameLayout.LayoutParams layout = new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
         root.addView(panel, layout);
         setContentView(root);
         // Coriolis has substantial geometry and is a useful default visual check.
-        for (int i = 0; i < models.length; ++i) if (models[i].equals("ship0")) selected = i;
-        mesh.model = selected;
+        if (savedInstanceState == null) {
+            for (int i = 0; i < models.length; ++i) if (models[i].equals("ship0")) selected = i;
+            mesh.model = selected;
+        } else selected = mesh.model;
+        mode = mesh.flags == 0 ? 0 : mesh.flags == 1 ? 1 : 2;
         updateTitle();
     }
 
     private void button(LinearLayout row, String text, View.OnClickListener action) {
         Button button = new Button(this);
+        button.setTextSize(10);
+        button.setAllCaps(false);
+        button.setMinimumWidth(0); button.setMinWidth(0);
+        button.setMinimumHeight(0); button.setMinHeight(0);
+        button.setPadding(10, 0, 10, 0);
         button.setText(text);
         button.setOnClickListener(action);
-        row.addView(button);
+        row.addView(button, new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, (int)(36 * getResources().getDisplayMetrics().density)));
     }
     private void select(int delta) {
         selected = (selected + delta + models.length) % models.length;
@@ -109,8 +131,13 @@ public final class MeshActivity extends Activity {
         updateTitle();
     }
     private void updateTitle() {
+        if (throttlePanel != null) throttlePanel.setVisibility(mesh.flightMode ? View.VISIBLE : View.GONE);
         title.setText((selected + 1) + "/" + models.length + "  " + models[selected]
             + " · " + (mesh != null && mesh.flightMode ? "Flight test" : new String[]{"Wireframe", "Solid", "Shaded"}[mode]));
+    }
+    @Override public void onSaveInstanceState(Bundle out) {
+        if (mesh != null) out.putBundle("mesh-test", mesh.saveTestState());
+        super.onSaveInstanceState(out);
     }
     @Override public void onResume() {
         super.onResume();
