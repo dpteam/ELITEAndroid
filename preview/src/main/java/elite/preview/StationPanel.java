@@ -20,6 +20,9 @@ final class StationPanel extends ScrollView {
         void trade(int item, boolean buy);
         void reset();
         void primary();
+        default String navigation() { return null; }
+        default void selectTarget(int delta) {}
+        default void selectReachable() {}
     }
     private static final String[] GOODS = {
         "Food", "Textiles", "Radioactives", "Slaves", "Liquor/Wines", "Luxuries",
@@ -42,6 +45,19 @@ final class StationPanel extends ScrollView {
         addView(panel);
         TextView notice = label(warning); notice.setTextColor(0xffffd86b); panel.addView(notice);
         summary = label(""); panel.addView(summary);
+        if (host.navigation() != null) {
+            LinearLayout navigation = new LinearLayout(context);
+            navigation.setOrientation(LinearLayout.VERTICAL);
+            TextView target = label(""); navigation.addView(target);
+            LinearLayout navigationControls = new LinearLayout(context);
+            Button previous = button("Target −"); previous.setOnClickListener(v -> { host.selectTarget(-1); refresh(); });
+            Button next = button("Target +"); next.setOnClickListener(v -> { host.selectTarget(1); refresh(); });
+            Button reachable = button("Reachable");
+            reachable.setOnClickListener(v -> { host.selectReachable(); refresh(); });
+            navigationControls.addView(previous); navigationControls.addView(next); navigationControls.addView(reachable);
+            navigation.addView(navigationControls); panel.addView(navigation);
+            target.setTag("navigation-label");
+        }
         receipt = label(hint);
         LinearLayout actions = new LinearLayout(context);
         Button reset = button("New test commander");
@@ -72,6 +88,16 @@ final class StationPanel extends ScrollView {
             Button buy = button("+1"); buy.setOnClickListener(v -> transact(item, true)); row.addView(buy);
             Button sell = button("−1"); sell.setOnClickListener(v -> transact(item, false)); row.addView(sell);
             table.addView(row);
+        }
+        for (int i = 0; i < ((LinearLayout)getChildAt(0)).getChildCount(); ++i) {
+            android.view.View child = ((LinearLayout)getChildAt(0)).getChildAt(i);
+            if (child instanceof LinearLayout) {
+                LinearLayout row = (LinearLayout)child;
+                for (int j = 0; j < row.getChildCount(); ++j) {
+                    android.view.View item = row.getChildAt(j);
+                    if ("navigation-label".equals(item.getTag())) ((TextView)item).setText(host.navigation());
+                }
+            }
         }
         panel.addView(table);
         refresh();

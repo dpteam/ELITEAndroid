@@ -17,6 +17,7 @@ set(ELITE_CORE_SOURCES
     src/elite_flight.c
     src/elite_scene.c
     src/elite_station.c
+    src/elite_navigation.c
     src/elite_session.c
     vendor/eliteagb/model_registry.c
     vendor/eliteagb/geometry_checksum.c

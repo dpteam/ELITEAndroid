@@ -36,6 +36,76 @@ JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_reset(JNIEnv *env,
     return session_bytes(env, &state);
 }
 
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_selectTarget(JNIEnv *env, jclass type,
+        jbyteArray bytes, jint index) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    if (elite_session_select_target(&state, (uint32_t)index)) {
+        session_error(env, "Invalid navigation target"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_selectReachable(JNIEnv *env, jclass type,
+        jbyteArray bytes) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    if (elite_session_select_reachable(&state)) {
+        session_error(env, "No reachable target in current fuel range"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_jump(JNIEnv *env, jclass type,
+        jbyteArray bytes) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    if (elite_session_jump(&state)) {
+        session_error(env, "Hyperspace test rejected: target too far or phase invalid"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_approach(JNIEnv *env, jclass type,
+        jbyteArray bytes, jint ticks) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    if (elite_session_approach(&state, (uint32_t)ticks)) {
+        session_error(env, "Station approach rejected"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_dock(JNIEnv *env, jclass type,
+        jbyteArray bytes) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    if (elite_session_dock(&state)) {
+        session_error(env, "Docking rejected: approach is not ready"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
+
 /* Action 0: launch, 1: explicit test return, 2: reset only the flight scene. */
 JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_transition(JNIEnv *env, jclass type,
         jbyteArray bytes, jint action) {

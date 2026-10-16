@@ -18,7 +18,7 @@ from replay_android_core import Replay
 def run(apk, cycles, output):
     abis = ('armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64')
     report = {'scope': __doc__, 'packaged_apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
-              'cycles': cycles, 'ticks_per_cycle': 60, 'snapshot_bytes': 1124, 'abis': {}}
+              'cycles': cycles, 'ticks_per_cycle': 60, 'snapshot_bytes': 1184, 'abis': {}}
     reference = None
     with zipfile.ZipFile(apk) as archive:
         for abi in abis:
@@ -33,13 +33,13 @@ def run(apk, cycles, output):
             def call(name, *args):
                 return lib.invoke('elite_session_' + name, lib.DATA, *args)
 
-            def saved(): return lib.read(0, 1124)
+            def saved(): return lib.read(0, 1184)
             def record(): trace.append(hashlib.sha256(saved()).hexdigest())
 
             models = lib.invoke('elite_model_count')
             model = next(i for i in range(models) if bytes(lib.uc.mem_read(
                 lib.invoke('elite_model_name', i), 80)).split(b'\0')[0] == b'ship0')
-            check('size', lib.invoke('elite_session_size'), 1124)
+            check('size', lib.invoke('elite_session_size'), 1184)
             check('reset', call('reset', model), 0)
             initial = saved()
             check('default_cash', struct.unpack_from('<I', initial, 24)[0], 5000)
@@ -47,6 +47,40 @@ def run(apk, cycles, output):
             check('docked_return_reject', call('return_test'), 2)
             check('docked_reset_scene_reject', call('reset_flight'), 2)
             check('atomic_wrong_phase', saved(), initial)
+            # Select the first reachable non-current system in the same galaxy.
+            target_index = None
+            for index in range(256):
+                check_result = lib.invoke('elite_navigation_select', lib.DATA + 16, index, lib.DATA + 8192)
+                if check_result == 0:
+                    navigation = lib.read(8192, 36)
+                    distance = struct.unpack_from('<I', navigation, 32)[0]
+                    if 0 < distance <= 60:
+                        target_index = index; target_distance = distance; break
+            if target_index is None: raise AssertionError(f'{abi}: no reachable target')
+            check('select_target', call('select_target', target_index), 0)
+            check('navigation_distance', struct.unpack_from('<I', saved(), 1156)[0], target_distance)
+            fuel_before = saved()[28]
+            check('navigation_buy', call('trade', 0, 1), 0)
+            check('navigation_launch', call('launch'), 0)
+            check('navigation_jump', call('jump'), 0)
+            jumped = saved()
+            check('navigation_phase', jumped[204], 0)
+            check('navigation_system', struct.unpack_from('<H', jumped, 122)[0], target_index)
+            check('navigation_fuel', jumped[28], fuel_before - target_distance)
+            check('navigation_cargo', jumped[66], 1)
+            check('navigation_return', call('return_test'), 0)
+            check('navigation_sell', call('trade', 0, 0), 0)
+            check('navigation_reset', call('reset', model), 0)
+            initial = saved()
+            check('dock_launch', call('launch'), 0)
+            check('dock_not_ready', call('dock'), 3)
+            check('dock_approach_first', call('approach', 1), 0)
+            check('dock_approach_finish', call('approach', 119), 0)
+            check('dock_ready', struct.unpack_from('<I', saved(), 1176)[0], 1)
+            check('dock_commit', call('dock'), 0)
+            check('dock_phase', saved()[204], 1)
+            check('dock_reset', call('reset', model), 0)
+            initial = saved()
             for cycle in range(cycles):
                 check('buy', call('trade', 0, 1), 0)
                 station = saved()[8:212]
@@ -66,7 +100,7 @@ def run(apk, cycles, output):
                     lib.put(4096, struct.pack('<9i', *inputs))
                     check('scene_reference_step', lib.invoke('elite_scene_step', lib.DATA + 8192, lib.DATA + 4096, 1), 0)
                     check('step', call('step', lib.DATA + 4096, 1), 0)
-                    check('scene_composition', saved()[212:], lib.read(8192, 912))
+                    check('scene_composition', saved()[212:1124], lib.read(8192, 912))
                     check('commander_unchanged', saved()[16:108], station[8:100])
                     check('market_unchanged', saved()[124:192], station[116:184])
                     record()

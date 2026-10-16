@@ -48,6 +48,9 @@ public final class SessionActivity extends Activity {
             public void trade(int item, boolean buy) { session.trade(item, buy); }
             public void reset() { session.reset(); paused = false; throttle = 8; }
             public void primary() { session.launch(); paused = false; showFlight(); }
+            public String navigation() { return session.navigation(); }
+            public void selectTarget(int delta) { session.shiftTarget(delta); }
+            public void selectReachable() { session.selectReachable(); }
         }, "CONNECTED TEST · One commander · Not the full game",
             "Same-station return is a test shortcut, not docking. No disk saves.", "Launch test"));
     }
@@ -61,20 +64,46 @@ public final class SessionActivity extends Activity {
         LinearLayout panel = new LinearLayout(this); panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(6, 2, 6, 2); panel.setBackgroundColor(0xb0000000);
         panel.addView(label("CONNECTED TEST · Return = shortcut, NOT docking", 0xffffd86b));
-        panel.addView(label(StationPanel.flightSummary(session.station()), 0xffffffff));
+        TextView summary = label(StationPanel.flightSummary(session.station()), 0xffffffff);
+        panel.addView(summary);
         TextView status = label("Starting session flight", 0xffb0d8ff); status.setMaxLines(2);
         panel.addView(status);
+        TextView dockingStatus = label(session.docking(), 0xffb0d8ff);
+        panel.addView(dockingStatus);
         view.statusListener = text -> { if (mesh == view) status.setText(text); };
-        LinearLayout actions = new LinearLayout(this);
+        LinearLayout actionRows = new LinearLayout(this);
+        actionRows.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout basicActions = new LinearLayout(this);
         Button pause = button(paused ? "Resume" : "Pause");
         pause.setOnClickListener(v -> { paused = !paused; view.rotating = !paused; pause.setText(paused ? "Resume" : "Pause"); });
-        actions.addView(pause);
-        Button reset = button("Reset scene"); reset.setOnClickListener(v -> view.resetFlight()); actions.addView(reset);
+        basicActions.addView(pause);
+        Button reset = button("Reset scene"); reset.setOnClickListener(v -> view.resetFlight()); basicActions.addView(reset);
         Button render = button("Mode"); render.setOnClickListener(v -> {
             mode = (mode + 1) % 3; view.flags = mode == 0 ? 0 : mode == 1 ? 1 : 3;
-        }); actions.addView(render);
-        Button back = button("Return (test)"); back.setOnClickListener(v -> returnToStation()); actions.addView(back);
-        panel.addView(actions);
+        }); basicActions.addView(render);
+        actionRows.addView(basicActions);
+        LinearLayout transitionActions = new LinearLayout(this);
+        Button back = button("Return (test)"); back.setOnClickListener(v -> returnToStation()); transitionActions.addView(back);
+        Button jump = button("Jump (test)"); jump.setOnClickListener(v -> {
+            try {
+                session.jump();
+                summary.setText(StationPanel.flightSummary(session.station()));
+                dockingStatus.setText(session.docking());
+            } catch (RuntimeException error) { status.setText("Jump rejected: " + error.getMessage()); }
+        }); transitionActions.addView(jump);
+        Button approach = button("Approach (test)"); approach.setOnClickListener(v -> {
+            try { session.approach(120); dockingStatus.setText(session.docking()); }
+            catch (RuntimeException error) { status.setText("Approach rejected: " + error.getMessage()); }
+        }); transitionActions.addView(approach);
+        Button dock = button("Dock (test)"); dock.setOnClickListener(v -> {
+            try {
+                if (mesh != null) { mesh.clearFlightInput(); mesh.onPause(); mesh = null; }
+                session.dock(); showStation();
+            }
+            catch (RuntimeException error) { dockingStatus.setText("Dock rejected: " + error.getMessage()); }
+        }); transitionActions.addView(dock);
+        actionRows.addView(transitionActions);
+        panel.addView(actionRows);
         panel.addView(label("Flight speed target (Adder): 1…36 · hold/drag to steer", 0xffb0d8ff));
         SeekBar speed = new SeekBar(this); speed.setMax(35); speed.setProgress(throttle - 1);
         speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

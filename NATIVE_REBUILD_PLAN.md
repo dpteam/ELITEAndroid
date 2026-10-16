@@ -114,7 +114,18 @@ uint32 cash overflow rather than reproducing unsafe wrapping.
 
 The preview `StationActivity` is new UI over this state. The new
 `SessionActivity` composes it with the bounded flight test scene through a
-1124-byte in-memory snapshot: transactions feed that test commander's flight
+1184-byte in-memory snapshot: transactions feed that test commander's flight
 session, and a clearly labelled Return shortcut restores the same station.
 This is not a launch/dock transition, original save-file format or replacement
 for the full game state.
+
+`elite_navigation.c` now selects one of the 256 generated systems and composes
+a fuel-limited test jump into Session. It updates the target system and market
+deterministically while preserving cargo. The original hyperspace countdown,
+miss-jump, encounters, legal-status decay, audio and universe object rebuild
+remain unimplemented.
+
+The Session harness now also has a 24-byte controlled docking corridor in its
+1184-byte snapshot. It decelerates and validates a bounded approach before
+committing `station.docked`; this is an integration test seam, not the original
+approach geometry, collision, station object, docking computer or docking UI.

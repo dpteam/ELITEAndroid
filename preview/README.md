@@ -28,12 +28,20 @@ no access to the original game's private saves.
   commander/system/market math: Lave data, credits, cargo, prices, stock and
   one-unit buy/sell. It has independent in-memory state from the Flight scene;
   switching screens is **not** docking/launching in a connected universe.
-- The `Session` screen is a bounded integration harness: one 1124-byte native
+- The `Session` screen is a bounded integration harness: one 1184-byte native
   snapshot owns commander/market state and the Flight test scene. Buy Food,
   launch, fly, use the explicitly labelled `Return (test)` shortcut and sell;
   credits, cargo and station stock are retained. Trading while flying is
   rejected. This does not implement docking, approach, collision, universe,
   missions or a durable save.
+- Session station view can select a galaxy system and shows its bounded jump
+  distance. `Jump (test)` consumes fuel, changes coordinates/name/market and
+  keeps commander cargo; it is not the original hyperspace countdown or full
+  universe transition. Targets beyond the current fuel range are rejected;
+  `Reachable` selects the first generated target within the current fuel.
+- In Flight, `Approach (test)` runs the bounded deceleration/alignment corridor
+  and `Dock (test)` commits only after it reports ready. This is a new test
+  path, not original docking, approach geometry, collision or docking computer.
 - Compact fullscreen panels support the tested 480x320 landscape display.
   Throttle controls are shown only in Flight. Both Activities keep the display
   awake only while visible; no global sleep or lock-screen settings are changed.

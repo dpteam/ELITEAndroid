@@ -10,12 +10,47 @@ int main(void) {
         if (!strcmp(elite_model_name(i), "ship0")) model = i;
     elite_session_state state, before;
     elite_controls_input input = {0};
-    CHECK(elite_session_size() == 1124);
+    CHECK(elite_session_size() == 1184);
     CHECK(!elite_session_valid(NULL));
     CHECK(elite_session_reset(NULL, model) == ELITE_SESSION_INVALID);
     CHECK(elite_session_reset(&state, model) == ELITE_SESSION_OK);
+    CHECK(elite_session_select_reachable(&state) == ELITE_SESSION_OK);
+    CHECK(state.navigation.distance <= state.station.commander.fuel && state.navigation.distance > 0);
     CHECK(elite_session_valid(&state) && state.station.docked == 1);
     CHECK(state.scene.profile == state.station.commander.ship);
+    elite_navigation_state target;
+    int target_index = -1;
+    for (unsigned i = 0; i < 256; ++i) {
+        int result = elite_navigation_select(&state.station.commander, i, &target);
+        if (result == ELITE_NAV_OK && target.distance <= state.station.commander.fuel) {
+            target_index = (int)i; break;
+        }
+    }
+    CHECK(target_index >= 0 && target.distance > 0 && target.distance <= 60);
+    CHECK(elite_session_select_target(&state, (uint32_t)target_index) == ELITE_SESSION_OK);
+    uint32_t jump_distance = target.distance;
+    uint32_t buy_price = state.station.prices[0];
+    CHECK(elite_session_trade(&state, 0, 1) == ELITE_TRADE_OK);
+    CHECK(elite_session_launch(&state) == ELITE_SESSION_OK);
+    uint8_t fuel_before_jump = state.station.commander.fuel;
+    CHECK(elite_session_jump(&state) == ELITE_SESSION_OK);
+    CHECK(state.station.docked == 0 && state.station.system_index == target_index);
+    CHECK(state.station.commander.fuel == fuel_before_jump - jump_distance);
+    CHECK(state.station.commander.cargo[0] == 1);
+    uint32_t sell_price = state.station.prices[0];
+    CHECK(elite_session_return_test(&state) == ELITE_SESSION_OK);
+    CHECK(elite_session_trade(&state, 0, 0) == ELITE_TRADE_OK);
+    CHECK(state.station.commander.cash == 5000 - buy_price + sell_price && state.station.commander.cargo[0] == 0);
+    CHECK(elite_session_reset(&state, model) == ELITE_SESSION_OK);
+    CHECK(elite_session_launch(&state) == ELITE_SESSION_OK);
+    CHECK(state.docking.status == ELITE_DOCK_APPROACH && state.docking.distance == ELITE_DOCK_DISTANCE);
+    CHECK(elite_session_dock(&state) == ELITE_SESSION_NOT_READY);
+    CHECK(elite_session_approach(&state, 1) == ELITE_SESSION_OK);
+    CHECK(state.docking.status == ELITE_DOCK_APPROACH);
+    CHECK(elite_session_approach(&state, 119) == ELITE_SESSION_OK);
+    CHECK(state.docking.status == ELITE_DOCK_READY);
+    CHECK(elite_session_dock(&state) == ELITE_SESSION_OK && state.station.docked == 1);
+    CHECK(state.docking.status == ELITE_DOCK_DOCKED);
     before = state;
     CHECK(elite_session_reset(&state, UINT32_MAX) == ELITE_SESSION_INVALID);
     CHECK(!memcmp(&state, &before, sizeof state));

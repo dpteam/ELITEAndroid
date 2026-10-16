@@ -19,6 +19,27 @@ final class PreviewSession {
     synchronized void launch() { state = NativeSession.transition(state, 0); }
     synchronized void returnTest() { state = NativeSession.transition(state, 1); }
     synchronized void resetFlight() { state = NativeSession.transition(state, 2); }
+    synchronized void selectTarget(int index) { state = NativeSession.selectTarget(state, index); }
+    synchronized void selectReachable() { state = NativeSession.selectReachable(state); }
+    synchronized void shiftTarget(int delta) {
+        int index = (readInt(state, 1124) + delta + 256) % 256;
+        selectTarget(index);
+    }
+    synchronized void jump() { state = NativeSession.jump(state); }
+    synchronized void approach(int ticks) { state = NativeSession.approach(state, ticks); }
+    synchronized void dock() { state = NativeSession.dock(state); }
+    synchronized String navigation() {
+        int index = readInt(state, 1124);
+        int distance = readInt(state, 1156);
+        return "Target system #" + index + " · jump " + distance + "/" + (state[28] & 255) + " ly";
+    }
+    synchronized String docking() {
+        int distance = readInt(state, 1160);
+        int speed = readInt(state, 1164);
+        int status = readInt(state, 1176);
+        return "Dock corridor · distance " + distance + " · speed " + speed + " · "
+            + (status == 0 ? "approach" : status == 1 ? "ready" : "docked");
+    }
     synchronized void reset() { state = NativeSession.reset(model()); }
     synchronized void trade(int item, boolean buy) { state = NativeSession.trade(state, item, buy); }
     synchronized byte[] stepScene(int[] input, int ticks) {

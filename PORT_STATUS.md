@@ -42,12 +42,22 @@
   regression test. Compacted both test screens for the 480x320 landscape display.
 - Added Flight Bundle restoration for scene, model, mode, pause and throttle;
   KEEP_SCREEN_ON applies only while each test Activity is visible.
-- Added a bounded `elite_session_state` composition: one 1124-byte owner joins
+- Added a bounded `elite_session_state` composition: one 1184-byte owner joins
   commander/market and the Flight test scene. Session launch preserves cargo,
   credits and stock; trade is rejected while flying; Return is an explicit
   same-station test shortcut, not docking. Four-ABI replay and 100 host cycles
   cover atomic failure/corrupt-state guards, and the flow was exercised on the
   Android 13 phone.
+- Added bounded navigation selection and fuel-limited test hyperspace. A jump
+  updates system coordinates/name/market while preserving commander cargo; the
+  original countdown, miss-jump, legal-status, encounters and universe updates
+  are intentionally still absent.
+- Added a `Reachable` selector so the device test can choose a valid target
+  without manually scanning all 256 generated systems.
+- Added a bounded docking corridor with distance, speed and alignment state.
+  `Approach (test)` decelerates to a ready state and `Dock (test)` commits the
+  station phase; the old Return shortcut remains explicitly labelled for
+  comparison. This is not the original approach/collision/docking code.
 
 ## Separate graphics-test APK
 
