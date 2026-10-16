@@ -1,0 +1,48 @@
+# Gradle and Android build output
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+
+# IDE metadata
+.idea/
+.vscode/
+
+# Reverse-engineering and extraction workspaces
+work/
+decompiled/
+jadx/
+
+# Local tool/cache directories if copied into the project
+android-sdk/
+elite-android-sdk/
+elite-tools/
+elite-gradle-home/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+hs_err_pid*
+*.keystore
+*.jks
+
+# Historical build and CVS artifacts inside the supplied reference tree
+/refs/**/o/
+/refs/**/obj/
+/refs/**/CVS/
+*.o
+
+# Large generated native-analysis pseudocode; keep the reproducible summary.
+/analysis/native-arm/
+/analysis/native-x86/
+/analysis/*/ghidra/
+/analysis/*/*.bin
+/analysis/*/symbols.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+refs/

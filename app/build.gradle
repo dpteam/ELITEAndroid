@@ -1,0 +1,37 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'elite.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'elite.app'
+        minSdk 21
+        targetSdk 35
+        versionCode 7
+        versionName '1.6-modern'
+    }
+
+    // The original game ships 32-bit ARM and x86 ELF files. Keep both in the
+    // universal APK; do not copy a 32-bit object into a 64-bit ABI directory.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+            excludes += ['/META-INF/ALIAS_NA.SF', '/META-INF/ALIAS_NA.RSA', '/META-INF/MANIFEST.MF']
+        }
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
