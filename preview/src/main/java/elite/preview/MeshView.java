@@ -35,6 +35,7 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
     private float lastX, lastY;
     private volatile float yaw = 0.5f;
     private long lastTime;
+    private final PreviewSession session;
     private int program, position, colour, projection;
     private final float[] matrix = new float[16];
     private final FloatBuffer buffer = ByteBuffer.allocateDirect(64 * 64 * 7 * 4)
@@ -46,7 +47,16 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
     };
 
     MeshView(Context context) {
+        this(context, null);
+    }
+
+    MeshView(Context context, PreviewSession session) {
         super(context);
+        this.session = session;
+        if (session != null) {
+            model = session.model(); flightMode = true;
+            flightState = session.scene(); flightModel = model; previousFlight = true;
+        }
         setEGLContextClientVersion(2);
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setRenderer(this);
@@ -168,7 +178,8 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
         double cy = Math.cos(a), sy = Math.sin(a), cp = Math.cos(b), sp = Math.sin(b);
         int selectedModel = model;
         if (flight && (flightModel != selectedModel || resetRequested || !previousFlight)) {
-            flightState = NativeFlight.reset(selectedModel, 0);
+            if (session == null) flightState = NativeFlight.reset(selectedModel, 0);
+            else { session.resetFlight(); flightState = session.scene(); }
             flightModel = selectedModel;
             resetRequested = false;
             flightFailure = null;
@@ -195,7 +206,8 @@ final class MeshView extends GLSurfaceView implements GLSurfaceView.Renderer {
                 int nextSpeed = clamp(readInt(flightState, 44) + readInt(flightState, 32), 1, 36);
                 input[4] = Integer.compare(throttleTarget, nextSpeed);
                 try {
-                    flightState = NativeFlight.step(flightState, input, 1);
+                    flightState = session == null ? NativeFlight.step(flightState, input, 1)
+                        : session.stepScene(input, 1);
                 } catch (IllegalStateException failure) {
                     flightFailure = "Flight stopped: " + failure.getMessage() + " · use Reset";
                     tickAccumulator = 0;

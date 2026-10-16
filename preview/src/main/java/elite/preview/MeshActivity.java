@@ -79,6 +79,7 @@ public final class MeshActivity extends Activity {
         button(controls, "Pause", v -> mesh.rotating = !mesh.rotating);
         button(controls, "Reset", v -> mesh.resetFlight());
         button(controls, "Station", v -> startActivity(new Intent(this, StationActivity.class)));
+        button(controls, "Session", v -> startActivity(new Intent(this, SessionActivity.class)));
         HorizontalScrollView controlScroll = new HorizontalScrollView(this);
         controlScroll.addView(controls);
         panel.addView(controlScroll);

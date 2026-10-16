@@ -42,6 +42,12 @@
   regression test. Compacted both test screens for the 480x320 landscape display.
 - Added Flight Bundle restoration for scene, model, mode, pause and throttle;
   KEEP_SCREEN_ON applies only while each test Activity is visible.
+- Added a bounded `elite_session_state` composition: one 1124-byte owner joins
+  commander/market and the Flight test scene. Session launch preserves cargo,
+  credits and stock; trade is rejected while flying; Return is an explicit
+  same-station test shortcut, not docking. Four-ABI replay and 100 host cycles
+  cover atomic failure/corrupt-state guards, and the flow was exercised on the
+  Android 13 phone.
 
 ## Separate graphics-test APK
 

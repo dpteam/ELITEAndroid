@@ -28,6 +28,12 @@ no access to the original game's private saves.
   commander/system/market math: Lave data, credits, cargo, prices, stock and
   one-unit buy/sell. It has independent in-memory state from the Flight scene;
   switching screens is **not** docking/launching in a connected universe.
+- The `Session` screen is a bounded integration harness: one 1124-byte native
+  snapshot owns commander/market state and the Flight test scene. Buy Food,
+  launch, fly, use the explicitly labelled `Return (test)` shortcut and sell;
+  credits, cargo and station stock are retained. Trading while flying is
+  rejected. This does not implement docking, approach, collision, universe,
+  missions or a durable save.
 - Compact fullscreen panels support the tested 480x320 landscape display.
   Throttle controls are shown only in Flight. Both Activities keep the display
   awake only while visible; no global sleep or lock-screen settings are changed.
@@ -92,6 +98,8 @@ process-death restoration were observed. The final paused Flight screenshots
 before/after process recreation are byte-identical. See
 [`../analysis/validation/device-android13.md`](../analysis/validation/device-android13.md)
 for APK identity, observations and limitations.
+The connected Session follow-up is documented in
+[`../analysis/validation/device-session-android13.md`](../analysis/validation/device-session-android13.md).
 
 **Not checked yet:** other Android versions/GPUs, 64-bit-only devices, actual
 ARM32/x86/x86_64 runtime execution, exhaustive on-device model/mode coverage,
@@ -117,6 +125,7 @@ python scripts/test_mesh_replay.py --packaged-apk preview/build/outputs/apk/debu
 python scripts/verify_preview_apk.py
 python scripts/test_flight_replay.py --packaged-apk preview/build/outputs/apk/debug/preview-debug.apk --output analysis/validation/preview-packaged-flight.json
 python scripts/test_station_replay.py --packaged-apk preview/build/outputs/apk/debug/preview-debug.apk --output analysis/validation/preview-packaged-station.json
+python scripts/test_session_replay.py --packaged-apk preview/build/outputs/apk/debug/preview-debug.apk --output analysis/validation/preview-packaged-session.json
 ```
 
 ## Known scope limitations

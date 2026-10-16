@@ -17,6 +17,7 @@ set(ELITE_CORE_SOURCES
     src/elite_flight.c
     src/elite_scene.c
     src/elite_station.c
+    src/elite_session.c
     vendor/eliteagb/model_registry.c
     vendor/eliteagb/geometry_checksum.c
     vendor/eliteagb/motion_math.c
@@ -50,6 +51,10 @@ if(ELITE_BUILD_TESTS)
     target_include_directories(elite_core_tests PRIVATE include vendor/eliteagb)
     target_compile_definitions(elite_core_tests PRIVATE HAVE_GBA_SHIPSETS HAVE_C64_KILLS USE_VANISHING_POINTS)
     add_test(NAME elite_core_tests COMMAND elite_core_tests)
+    add_executable(elite_session_tests tests/session_tests.c $<TARGET_OBJECTS:elite_core_objects>)
+    target_include_directories(elite_session_tests PRIVATE include vendor/eliteagb)
+    target_compile_definitions(elite_session_tests PRIVATE HAVE_GBA_SHIPSETS HAVE_C64_KILLS USE_VANISHING_POINTS)
+    add_test(NAME elite_session_tests COMMAND elite_session_tests)
 endif()
 
 if(ELITE_BUILD_PREVIEW)

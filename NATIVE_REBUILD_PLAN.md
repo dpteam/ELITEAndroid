@@ -112,6 +112,9 @@ callbacks are intercepted explicitly at their boundary; their behavior is not
 claimed restored. Intentional extra guards prevent uint8 cargo/stock and
 uint32 cash overflow rather than reproducing unsafe wrapping.
 
-The preview `StationActivity` is new UI over this state. Its transactions do
-not feed a flight commander yet, and opening/closing the screen is not a
-launch/dock transition. The snapshot is not an original save-file format.
+The preview `StationActivity` is new UI over this state. The new
+`SessionActivity` composes it with the bounded flight test scene through a
+1124-byte in-memory snapshot: transactions feed that test commander's flight
+session, and a clearly labelled Return shortcut restores the same station.
+This is not a launch/dock transition, original save-file format or replacement
+for the full game state.

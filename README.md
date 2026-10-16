@@ -30,8 +30,9 @@ for a modern Android loader or a 64-bit-only device.
 The `preview/` module is **not the game**. It uses rebuilt native mesh code,
 provides a GLES2 model viewer, and has its own package name (`elite.preview`).
 It packages ARMv7, ARM64, x86, and x86_64 libraries without replacing `elite.app`.
-It also contains separate Flight and Station core-test screens: movement and
-market state are exercised independently, not as a connected playable game.
+It also contains separate Flight and Station core-test screens, plus a bounded
+Session screen that shares one in-memory commander snapshot across test launch,
+flight, return and trade transitions. It is still not a connected playable game.
 
 ```text
 python scripts/prepare_native.py
@@ -44,7 +45,8 @@ Output: `preview/build/outputs/apk/debug/preview-debug.apk`. See
 and remaining release work. The APK has passed build, signature and static
 alignment checks, plus an ARM64 runtime smoke test on an Android 13 E5 phone:
 GLES2 models, Flight controls, Station trades and saved-instance restoration.
-See [`analysis/validation/device-android13.md`](analysis/validation/device-android13.md).
+The Session integration flow also passed; see
+[`analysis/validation/device-session-android13.md`](analysis/validation/device-session-android13.md).
 Other Android versions and device ABIs have not been runtime-tested.
 
 ## ABI limitation

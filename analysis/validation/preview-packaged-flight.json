@@ -1,6 +1,6 @@
 {
   "original_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
-  "packaged_apk_sha256": "59944a641b83fb347295255816b14157831e9e19ca018e492aa50f849e02daa1",
+  "packaged_apk_sha256": "3d30f915cd3844433bbfe4d783a3078e4b2d918e7cfcbc0f08f40001190eb807",
   "random_seed": "0xe117f",
   "samples": 300,
   "control_ticks_per_profile": 200,
@@ -15,7 +15,7 @@
         "scene_reset": 1,
         "scene_tick": 600
       },
-      "sha256": "12a162d8b4ff4481434f363ea713b3599d0d849d153c933dc696f9f438eab017"
+      "sha256": "4f7b23321094f2bf6f5d3d2904cc1e1b3eb517e0a4e6f4b73ca0057cdcb74bf8"
     },
     "arm64-v8a": {
       "status": "passed",
@@ -28,7 +28,7 @@
         "scene_tick": 600,
         "cross_abi_scene_trace": 1
       },
-      "sha256": "3bfc30a88af895ccbe25361d5265cabacee3ccdfbd1661fb27fdc515979b47cf"
+      "sha256": "4a036f5efc8182ffc817eae5497c075f8b19cd811ba65706092bff2688c0e635"
     },
     "x86": {
       "status": "passed",
@@ -41,7 +41,7 @@
         "scene_tick": 600,
         "cross_abi_scene_trace": 1
       },
-      "sha256": "8a8107e58c65b2c87500de1d5841aa80e58764320a4ecbdbb59cbdff72e1798e"
+      "sha256": "3a00a2e5040462ceb4771457ad6deaa608acc1690ab8b7aa696e8b9bf9092dff"
     },
     "x86_64": {
       "status": "passed",
@@ -54,7 +54,7 @@
         "scene_tick": 600,
         "cross_abi_scene_trace": 1
       },
-      "sha256": "0cc85db49534936a6f8f712fd0b8e070a92daf1cc5ec650f55f88775f67e65d2"
+      "sha256": "db6ba8baa25b9507d6fd1e1f5191d83906e3509c3d1162322b24f9b5ee3fc27f"
     }
   },
   "limitations": [

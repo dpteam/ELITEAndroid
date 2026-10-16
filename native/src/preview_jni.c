@@ -2,6 +2,86 @@
 #include "elite_mesh.h"
 #include "elite_scene.h"
 #include "elite_station.h"
+#include "elite_session.h"
+
+static void session_error(JNIEnv *env, const char *message) {
+    jclass error = (*env)->FindClass(env, "java/lang/IllegalStateException");
+    if (error) (*env)->ThrowNew(env, error, message);
+}
+
+static int read_session(JNIEnv *env, jbyteArray bytes, elite_session_state *state) {
+    if (!bytes || (*env)->GetArrayLength(env, bytes) != (jsize)sizeof(*state)) return 0;
+    (*env)->GetByteArrayRegion(env, bytes, 0, (jsize)sizeof(*state), (jbyte *)state);
+    return !(*env)->ExceptionCheck(env) && elite_session_valid(state);
+}
+
+static jbyteArray session_bytes(JNIEnv *env, const elite_session_state *state) {
+    jbyteArray bytes = (*env)->NewByteArray(env, (jsize)sizeof(*state));
+    if (bytes) (*env)->SetByteArrayRegion(env, bytes, 0, (jsize)sizeof(*state), (const jbyte *)state);
+    return bytes;
+}
+
+JNIEXPORT jboolean JNICALL Java_elite_preview_NativeSession_valid(JNIEnv *env, jclass type, jbyteArray bytes) {
+    (void)type;
+    elite_session_state state;
+    return read_session(env, bytes, &state) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_reset(JNIEnv *env, jclass type, jint model) {
+    (void)type;
+    elite_session_state state;
+    if (elite_session_reset(&state, (uint32_t)model)) {
+        session_error(env, "Invalid session target model"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
+
+/* Action 0: launch, 1: explicit test return, 2: reset only the flight scene. */
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_transition(JNIEnv *env, jclass type,
+        jbyteArray bytes, jint action) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    int result = action == 0 ? elite_session_launch(&state) : action == 1 ? elite_session_return_test(&state)
+        : action == 2 ? elite_session_reset_flight(&state) : ELITE_SESSION_INVALID;
+    if (result) { session_error(env, "Session transition rejected"); return NULL; }
+    return session_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_trade(JNIEnv *env, jclass type,
+        jbyteArray bytes, jint item, jboolean buy) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state)) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session snapshot");
+        return NULL;
+    }
+    elite_session_trade(&state, (uint32_t)item, buy == JNI_TRUE);
+    return session_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeSession_step(JNIEnv *env, jclass type,
+        jbyteArray bytes, jintArray input, jint ticks) {
+    (void)type;
+    elite_session_state state;
+    if (!read_session(env, bytes, &state) || !input || (*env)->GetArrayLength(env, input) != 9 || ticks < 0 || ticks > 4) {
+        if (!(*env)->ExceptionCheck(env)) session_error(env, "Invalid session state/input");
+        return NULL;
+    }
+    jint values[9];
+    (*env)->GetIntArrayRegion(env, input, 0, 9, values);
+    if ((*env)->ExceptionCheck(env)) return NULL;
+    elite_controls_input controls = {
+        values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8]
+    };
+    if (elite_session_step(&state, &controls, (uint32_t)ticks)) {
+        session_error(env, "Session flight step rejected"); return NULL;
+    }
+    return session_bytes(env, &state);
+}
 
 static jbyteArray station_bytes(JNIEnv *env, const elite_station_state *state) {
     jbyteArray output = (*env)->NewByteArray(env, (jsize)sizeof(*state));
