@@ -25,6 +25,7 @@ elite-gradle-home/
 *.tmp
 *.bak
 hs_err_pid*
+scripts/__pycache__/
 *.keystore
 *.jks
 
@@ -40,6 +41,9 @@ hs_err_pid*
 /analysis/*/ghidra/
 /analysis/*/*.bin
 /analysis/*/symbols.json
+
+# Generated copies of user-provided reference source (regenerate locally).
+/native/vendor/eliteagb/
 
 # OS metadata
 .DS_Store

@@ -1,0 +1,167 @@
+{
+  "scope": "Function-level emulation only; no Android runtime, JNI, rendering, or device install.",
+  "unicorn_version": "2.1.4",
+  "samples_per_routine": 100,
+  "original_x86_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
+  "abis": {
+    "armeabi-v7a": {
+      "status": "passed",
+      "sha256": "4a83746c1dd2160255992dc586e56a7f008dfa817a4a9918f149fabb6f2762e5",
+      "bits": 32,
+      "machine": 40,
+      "checks": {
+        "geometry_checksum": 1,
+        "churn_seed": 100,
+        "norm": 100,
+        "norm_return": 100,
+        "flip_vect": 100,
+        "norm_big": 100,
+        "fixed_rotate": 100,
+        "fly_to_vector_final": 100,
+        "fly_to_vector": 100
+      },
+      "textrel": false,
+      "load_segments": [
+        {
+          "flags": 5,
+          "alignment": 16384,
+          "offset": 0,
+          "address": 0
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 95568,
+          "address": 111952
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 103764,
+          "address": 136532
+        }
+      ]
+    },
+    "arm64-v8a": {
+      "status": "passed",
+      "sha256": "70d82bec951954b8467699804e21a413f7052db8c4985a20b9b02aaf0169efd4",
+      "bits": 64,
+      "machine": 183,
+      "checks": {
+        "geometry_checksum": 1,
+        "churn_seed": 100,
+        "norm": 100,
+        "norm_return": 100,
+        "flip_vect": 100,
+        "norm_big": 100,
+        "fixed_rotate": 100,
+        "fly_to_vector_final": 100,
+        "fly_to_vector": 100
+      },
+      "textrel": false,
+      "load_segments": [
+        {
+          "flags": 5,
+          "alignment": 16384,
+          "offset": 0,
+          "address": 0
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 121616,
+          "address": 138000
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 136952,
+          "address": 169720
+        }
+      ]
+    },
+    "x86": {
+      "status": "passed",
+      "sha256": "c87fc8cc17ed715c3011519c662cc6f8eaec9d23b9c8cb695a3114b6ea4afe5f",
+      "bits": 32,
+      "machine": 3,
+      "checks": {
+        "geometry_checksum": 1,
+        "churn_seed": 100,
+        "norm": 100,
+        "norm_return": 100,
+        "flip_vect": 100,
+        "norm_big": 100,
+        "fixed_rotate": 100,
+        "fly_to_vector_final": 100,
+        "fly_to_vector": 100
+      },
+      "textrel": false,
+      "load_segments": [
+        {
+          "flags": 5,
+          "alignment": 16384,
+          "offset": 0,
+          "address": 0
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 102464,
+          "address": 118848
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 110660,
+          "address": 143428
+        }
+      ]
+    },
+    "x86_64": {
+      "status": "passed",
+      "sha256": "3bc9af156b3949a05fed62dae4b8e900852ac9e6328a526b535dce9f8a452528",
+      "bits": 64,
+      "machine": 62,
+      "checks": {
+        "geometry_checksum": 1,
+        "churn_seed": 100,
+        "norm": 100,
+        "norm_return": 100,
+        "flip_vect": 100,
+        "norm_big": 100,
+        "fixed_rotate": 100,
+        "fly_to_vector_final": 100,
+        "fly_to_vector": 100
+      },
+      "textrel": false,
+      "load_segments": [
+        {
+          "flags": 5,
+          "alignment": 16384,
+          "offset": 0,
+          "address": 0
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 125664,
+          "address": 142048
+        },
+        {
+          "flags": 6,
+          "alignment": 16384,
+          "offset": 141024,
+          "address": 173792
+        }
+      ]
+    }
+  },
+  "status": "passed",
+  "limitations": [
+    "ELF relocation and call helpers are test harnesses, not a production Android loader.",
+    "Small bounded fixed-point inputs only; no claim of all-input equivalence.",
+    "Replay does not test GLES, JNI, audio, saves, UI or Android lifecycle.",
+    "APK still requires its original full libelite_native.so; elite_core is only the rebuilt subset."
+  ]
+}

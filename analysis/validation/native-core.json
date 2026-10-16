@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "random_seed": "0xe117e",
+  "samples": 100,
+  "original_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
+  "rebuilt_host_sha256": "be2c7bda2144de418b6fd6a5c54c11ce323bf66fbdd26181dc40db00367639c7",
+  "checks": {
+    "churn_seed": 100,
+    "norm": 100,
+    "flip_vect": 100,
+    "norm_big": 100,
+    "fixed_rotate": 100,
+    "fly_to_vector_final": 100,
+    "fly_to_vector": 100,
+    "geometry_array": 110,
+    "geometry_checksum": 1,
+    "zero_norm_guard": 1,
+    "zero_norm_big_guard": 1,
+    "integer_sqrt": 9
+  },
+  "geometry_checksum": "ac59f864",
+  "limitations": [
+    "Original x86 instructions replayed offline in Unicorn; no Android runtime or GLES/JNI startup.",
+    "Rebuilt routines executed as a Windows x64 DLL; Android binaries are cross-compiled separately.",
+    "Bounded input domains: small fixed-point vectors and matrix entries, not arbitrary int32 overflow inputs.",
+    "norm_big zero-vector handling is an intentional safety fix, not an original behavior match.",
+    "Integer square root is exact; legacy float32 rounding at large values is not reproduced."
+  ]
+}

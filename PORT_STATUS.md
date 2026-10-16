@@ -12,6 +12,11 @@
 - Built and packaged the APK successfully.
 - Added reproducible static native analysis scripts and regenerated Ghidra
   pseudocode for both shipped ELF32 libraries.
+- Added a separately buildable fixed-width native subset and NDK output for
+  `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`; it is not yet wired into the
+  APK because it does not contain the full game/platform layer.
+- Offline differential replay passed for all four rebuilt ABIs on the selected
+  core routines; see `analysis/validation/android-core.json`.
 
 ## Verified artifact
 

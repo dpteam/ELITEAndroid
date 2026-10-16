@@ -23,3 +23,47 @@ reference. The practical route to a real 64-bit APK is:
 
 The current project deliberately keeps the original native objects as a
 known-behavior fallback while this rebuild is incomplete.
+
+## Current native subset
+
+`native/` now contains a separately buildable subset, not yet the full game:
+
+- imported ship geometry from Elite AGB;
+- fixed-width (`int32_t`) vector/matrix layout checks;
+- integer square root, seed churn, vector normalization and rotation;
+- autopilot vector routines;
+- host tests and Android NDK builds for all four requested ABIs.
+
+Run the import and host tests:
+
+```text
+python scripts/prepare_native.py
+cmake -S native -B build/native-host -G Ninja -DCMAKE_C_COMPILER=gcc
+cmake --build build/native-host
+ctest --test-dir build/native-host --output-on-failure
+```
+
+Build Android subset libraries after installing NDK 28.2 and CMake 3.22.1:
+
+```text
+./scripts/build_native.ps1 -Sdk "$env:ANDROID_HOME" -Abis arm64-v8a,x86_64
+```
+
+The script's output is intentionally not copied into the APK yet. The full
+platform layer still needs to be ported before `elite_core` can replace
+`libelite_native.so`.
+
+The generated `native/vendor/eliteagb` directory is ignored by Git because it
+is derived from the local user-supplied `refs/eliteagb-0.5.2` tree. The build
+script regenerates it before configuring CMake; `refs/` must therefore be
+present in a clean working copy.
+
+## Validation result
+
+`analysis/validation/android-core.json` records an offline replay of the
+original x86 machine code against every rebuilt ABI. At the current bounded
+sample count (100 per routine), all four ABIs passed `geometry_checksum`,
+`churn_seed`, `norm`, `norm_big`, `fixed_rotate`, `flip_vect`,
+`fly_to_vector_final`, and `fly_to_vector`. The replay uses Unicorn and does
+not execute an Android process. It does not validate the full renderer,
+JNI/audio callbacks, lifecycle, saves, or device behavior.
