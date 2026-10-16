@@ -1,5 +1,7 @@
 # Gradle and Android build output
 .gradle/
+.cxx/
+.externalNativeBuild/
 build/
 app/build/
 local.properties

@@ -1,0 +1,172 @@
+{
+  "status": "passed",
+  "apk_sha256": "86b8ca9a54a34e5c599d75dd2ccb11d1e738c67f3896014a9c6b173867d9c773",
+  "apk_bytes": 684122,
+  "application": "elite.preview \u2014 separate mesh test, not the game",
+  "libraries": {
+    "lib/arm64-v8a/libelite_core.so": {
+      "sha256": "f111bc43c31638c05eab2499980d226d4ba9def2dd4112b5a977712b949d224e",
+      "bytes": 155056,
+      "elf_class": 64,
+      "machine": 183,
+      "textrel": false,
+      "zip_data_offset": 16384,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/arm64-v8a/libelite_preview.so": {
+      "sha256": "2634cced2f602858a979848d7a9d815d2df98ad2850aa43493f9290c2c2b435d",
+      "bytes": 7176,
+      "elf_class": 64,
+      "machine": 183,
+      "textrel": false,
+      "zip_data_offset": 655360,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/armeabi-v7a/libelite_core.so": {
+      "sha256": "0bceb3cf11967ea2af4b767504823944bcb4b3839eb6cd6b63131aa2e3d55051",
+      "bytes": 110012,
+      "elf_class": 32,
+      "machine": 40,
+      "textrel": false,
+      "zip_data_offset": 196608,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/armeabi-v7a/libelite_preview.so": {
+      "sha256": "bd5b32d5e16c721d7d9c88752ea0e1998f20d32d68beadbed946bade8cd9886e",
+      "bytes": 4868,
+      "elf_class": 32,
+      "machine": 40,
+      "textrel": false,
+      "zip_data_offset": 180224,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/x86/libelite_core.so": {
+      "sha256": "8c5eca9a59256c08b65907e9fc181910f03ed5ce47c272694d636db471cae307",
+      "bytes": 128744,
+      "elf_class": 32,
+      "machine": 3,
+      "textrel": false,
+      "zip_data_offset": 327680,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/x86/libelite_preview.so": {
+      "sha256": "5187de22fa15095cbc520e3b6dc553115e12b3da2439573dbc9da9973dfbc547",
+      "bytes": 5960,
+      "elf_class": 32,
+      "machine": 3,
+      "textrel": false,
+      "zip_data_offset": 638976,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/x86_64/libelite_core.so": {
+      "sha256": "40bcdc90288373b58f3b2ec1cc8238046838f176925c608ff8b86807e9cba002",
+      "bytes": 154752,
+      "elf_class": 64,
+      "machine": 62,
+      "textrel": false,
+      "zip_data_offset": 475136,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/x86_64/libelite_preview.so": {
+      "sha256": "7f162ecab60fc34bc082a23ef6703f15c8d7d6fd8e8ec4060850797023c9e9f1",
+      "bytes": 7120,
+      "elf_class": 64,
+      "machine": 62,
+      "textrel": false,
+      "zip_data_offset": 671744,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Signature verification belongs to apksigner; this script checks archive/ELF layout only.",
+    "No installation, JNI execution, Android lifecycle or GPU rendering was observed."
+  ]
+}

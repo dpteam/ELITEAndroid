@@ -1,4 +1,5 @@
 #include "elite_core.h"
+#include "elite_mesh.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -43,7 +44,40 @@ int main(void) {
     CHECK(ship.rotz == 0x87 && ship.rotx == 0);
 
     CHECK(elite_geometry_checksum() == 0xac59f864u);
+    CHECK(elite_mesh_frame_size() == 4636);
+    CHECK(elite_model_count() == 66);
+    CHECK(elite_model_at(elite_model_count()) == NULL);
+    CHECK(elite_model_name(elite_model_count()) == NULL);
+    elite_mesh_frame frame;
+    uint32_t model = 0;
+    for (uint32_t i = 0; i < elite_model_count(); ++i)
+        if (strcmp(elite_model_name(i), "ship0") == 0) model = i;
+    memset(&ship, 0, sizeof ship);
+    ship.rotmat[0].x = ship.rotmat[1].y = ship.rotmat[2].z = 24576;
+    ship.location.z = 360;
+    ship.type = 1;
+    stellarobject_t before = ship;
+    CHECK(elite_mesh_build(model, &ship, ELITE_MESH_SOLID, &frame) == ELITE_MESH_OK);
+    CHECK(frame.vertex_count > 0 && frame.command_count > 0);
+    CHECK(memcmp(&before, &ship, sizeof ship) == 0);
+    for (unsigned i = 0; i < frame.command_count; ++i) {
+        CHECK(frame.commands[i].count <= ELITE_MESH_CAPACITY);
+        for (unsigned j = 0; j < frame.commands[i].count; ++j)
+            CHECK(frame.commands[i].indices[j] < frame.vertex_count);
+    }
+    CHECK(elite_mesh_build(UINT32_MAX, &ship, 1, &frame) == ELITE_MESH_INVALID);
+    CHECK(elite_mesh_build(model, NULL, 1, &frame) == ELITE_MESH_INVALID);
+    CHECK(elite_mesh_build(model, &ship, 1, NULL) == ELITE_MESH_INVALID);
+    CHECK(elite_mesh_build(model, &ship, 8, &frame) == ELITE_MESH_INVALID);
+    ship.location.z = -360;
+    CHECK(elite_mesh_build(model, &ship, 1, &frame) == ELITE_MESH_CULLED);
+    ship = before; ship.location.x = 0x7fffffff;
+    CHECK(elite_mesh_build(model, &ship, 1, &frame) == ELITE_MESH_INVALID);
+    ship = before; ship.missiles = 0x20;
+    CHECK(elite_mesh_build(model, &ship, 1, &frame) == ELITE_MESH_EFFECT_UNSUPPORTED);
+    ship = before; memset(ship.rotmat, 0, sizeof ship.rotmat);
+    CHECK(elite_mesh_build(model, &ship, 1, &frame) == ELITE_MESH_INVALID);
     printf("geometry_checksum=%08x\n", elite_geometry_checksum());
-    printf("OK: fixed-width layouts, 100000 square roots, seed, rotation, autopilot, zero guards\n");
+    printf("OK: layouts, 100000 square roots, seed, rotation, autopilot, mesh and invalid-input guards\n");
     return 0;
 }

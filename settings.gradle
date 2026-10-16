@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "EliteModern"
 include(":app")
+include(":preview")

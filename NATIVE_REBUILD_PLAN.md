@@ -67,3 +67,21 @@ sample count (100 per routine), all four ABIs passed `geometry_checksum`,
 `fly_to_vector_final`, and `fly_to_vector`. The replay uses Unicorn and does
 not execute an Android process. It does not validate the full renderer,
 JNI/audio callbacks, lifecycle, saves, or device behavior.
+
+## Mesh / viewer checkpoint
+
+`native/src/elite_mesh.c` now reconstructs the non-effect part of `entry()`:
+fixed-point camera transform, face visibility, detail thresholds, saturated
+short GLES coordinates and indexed polygon/line commands. It intentionally
+has no laser/explosion/distant-flicker/game-state side effects.
+
+`scripts/test_mesh_replay.py` runs the original APK's x86 `entry()` and records
+its `polygon3d()` submissions, then compares each rebuilt ABI's packets with
+those submissions. This validates mesh math/commands, not pixels or a GPU.
+The harness explicitly substitutes memory clearing and supplies test TLS for
+stack canaries. See the retained JSON for full limits.
+
+`preview/` connects the mesh subset through a separate JNI bridge and GLES2
+viewer. This is a visual test application and must not be mistaken for the
+full native game rebuild. The next integration work remains the game state,
+full simulation/menus, HUD/sprites/effects and persistence/audio callbacks.

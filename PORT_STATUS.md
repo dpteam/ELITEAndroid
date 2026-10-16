@@ -17,6 +17,17 @@
   APK because it does not contain the full game/platform layer.
 - Offline differential replay passed for all four rebuilt ABIs on the selected
   core routines; see `analysis/validation/android-core.json`.
+- Reconstructed a reentrant non-effect mesh-preparation path, compared 66 model
+  descriptors in wireframe/solid/shaded modes against the original APK command
+  stream on four ABIs, and built a separate GLES2/JNI graphics-test application.
+
+## Separate graphics-test APK
+
+`preview/build/outputs/apk/debug/preview-debug.apk` (`elite.preview`) contains
+rebuilt ARMv7/ARM64/x86/x86_64 libraries. It is a model viewer, **not the game**.
+Build, signature and static ELF/ZIP alignment checks passed. Android GPU/JNI
+runtime testing has not been performed. Full limitations are listed in
+`preview/README.md` and `RELEASE_CHECKLIST.md`.
 
 ## Verified artifact
 

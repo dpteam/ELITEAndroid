@@ -14,14 +14,33 @@ and native libraries are included. The native registration class remains
 Build a debug APK:
 
 ```text
-gradlew.bat assembleDebug
+gradlew.bat :app:assembleDebug
 ```
 
 Output:
 `app/build/outputs/apk/debug/app-debug.apk`
 
-The generated APK is signed with the standard debug key and is suitable for
-local installation/testing.
+The generated APK is signed with the standard debug key. This is a buildable
+compatibility prototype, not a device-validated Android 11/13 port. In
+particular, the old ARM object declares text relocations and is not a solution
+for a modern Android loader or a 64-bit-only device.
+
+## Separate 64-bit graphics test
+
+The `preview/` module is **not the game**. It uses rebuilt native mesh code,
+provides a GLES2 model viewer, and has its own package name (`elite.preview`).
+It packages ARMv7, ARM64, x86, and x86_64 libraries without replacing `elite.app`.
+
+```text
+python scripts/prepare_native.py
+gradlew.bat :preview:assembleDebug
+```
+
+Output: `preview/build/outputs/apk/debug/preview-debug.apk`. See
+[`preview/README.md`](preview/README.md) and
+[`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for the exact validation boundary
+and remaining release work. The APK has passed build, signature and static
+alignment checks; Android GPU execution has not yet been observed.
 
 ## ABI limitation
 

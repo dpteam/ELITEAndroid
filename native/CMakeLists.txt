@@ -5,9 +5,16 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(ELITE_BUILD_TESTS "Build executable subset tests (host by default)" ON)
+option(ELITE_BUILD_PREVIEW "Build separate Android mesh viewer JNI, NOT the game" OFF)
+
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/eliteagb/shipdata.c")
+    message(FATAL_ERROR "Run python scripts/prepare_native.py from the repository root first. Local refs/eliteagb-0.5.2 is required.")
+endif()
 
 set(ELITE_CORE_SOURCES
     src/elite_core.c
+    src/elite_mesh.c
+    vendor/eliteagb/model_registry.c
     vendor/eliteagb/geometry_checksum.c
     vendor/eliteagb/motion_math.c
     vendor/eliteagb/autopilot_math.c
@@ -34,4 +41,13 @@ if(ELITE_BUILD_TESTS)
     target_include_directories(elite_core_tests PRIVATE include vendor/eliteagb)
     target_compile_definitions(elite_core_tests PRIVATE HAVE_GBA_SHIPSETS HAVE_C64_KILLS USE_VANISHING_POINTS)
     add_test(NAME elite_core_tests COMMAND elite_core_tests)
+endif()
+
+if(ELITE_BUILD_PREVIEW)
+    if(NOT ANDROID)
+        message(FATAL_ERROR "The JNI preview target requires the Android toolchain")
+    endif()
+    add_library(elite_preview SHARED src/preview_jni.c)
+    target_link_libraries(elite_preview PRIVATE elite_core)
+    target_link_options(elite_preview PRIVATE -Wl,-z,max-page-size=16384 -Wl,--no-undefined)
 endif()

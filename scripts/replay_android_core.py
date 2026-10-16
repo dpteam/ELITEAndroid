@@ -17,6 +17,12 @@ from unicorn import Uc, UC_ARCH_X86, UC_ARCH_ARM, UC_ARCH_ARM64, UC_MODE_32, UC_
 from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_RAX, UC_X86_REG_RSP, UC_X86_REG_RIP, UC_X86_REG_RDI, UC_X86_REG_RSI, UC_X86_REG_RDX, UC_X86_REG_RCX, UC_X86_REG_R8, UC_X86_REG_R9
 from unicorn.arm_const import UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3, UC_ARM_REG_LR, UC_ARM_REG_SP, UC_ARM_REG_PC
 from unicorn.arm64_const import UC_ARM64_REG_X0, UC_ARM64_REG_X1, UC_ARM64_REG_X2, UC_ARM64_REG_X3, UC_ARM64_REG_X4, UC_ARM64_REG_X5, UC_ARM64_REG_X6, UC_ARM64_REG_X7, UC_ARM64_REG_LR, UC_ARM64_REG_SP, UC_ARM64_REG_PC
+from unicorn.arm_const import UC_ARM_REG_C1_C0_2, UC_ARM_REG_FPEXC
+from unicorn.arm64_const import UC_ARM64_REG_CPACR_EL1
+from unicorn.arm64_const import UC_ARM64_REG_TPIDR_EL0
+from unicorn.x86_const import UC_X86_REG_FS_BASE
+from unicorn.x86_const import UC_X86_REG_GDTR, UC_X86_REG_GS
+from unicorn.x86_const import UC_X86_REG_DS, UC_X86_REG_ES, UC_X86_REG_SS, UC_X86_REG_CS
 
 
 class Replay:
@@ -26,7 +32,7 @@ class Replay:
     IMPORTS = 0xb00000
     STACK = 0xc00000
 
-    def __init__(self, path):
+    def __init__(self, path, memory_imports=False):
         self.data = path if isinstance(path, bytes) else path.read_bytes()
         data = self.data
         if data[:4] != b'\x7fELF' or data[5] != 1:
@@ -36,9 +42,34 @@ class Replay:
         arch, mode = {3: (UC_ARCH_X86, UC_MODE_32), 62: (UC_ARCH_X86, UC_MODE_64),
                       40: (UC_ARCH_ARM, UC_MODE_ARM), 183: (UC_ARCH_ARM64, UC_MODE_ARM)}[self.machine]
         self.uc = Uc(arch, mode)
+        # Android's ABI permits VFP/NEON. Enable it in the emulated CPU; otherwise
+        # compiler-generated structure copies may trap despite valid ELF code.
+        if self.machine == 40:
+            self.uc.reg_write(UC_ARM_REG_C1_C0_2, 0xf << 20)
+            self.uc.reg_write(UC_ARM_REG_FPEXC, 1 << 30)
+        elif self.machine == 183:
+            self.uc.reg_write(UC_ARM64_REG_CPACR_EL1, 3 << 20)
         for start, size in ((self.BASE, 0x800000), (self.DATA, 0x10000), (self.STOP, 0x10000),
-                            (self.IMPORTS, 0x10000), (self.STACK, 0x10000)):
+                            (self.IMPORTS, 0x10000), (self.STACK, 0x10000), (0xd00000, 0x10000)):
             self.uc.mem_map(start, size)
+        # A zeroed test TLS page supplies the stack-canary slot. No Bionic
+        # initialization is run; __stack_chk_fail still traps if reached.
+        if self.machine == 183:
+            self.uc.reg_write(UC_ARM64_REG_TPIDR_EL0, 0xd00000)
+        elif self.machine == 62:
+            self.uc.reg_write(UC_X86_REG_FS_BASE, 0xd00000)
+        elif self.machine == 3:
+            tls = 0xd01000
+            descriptor = struct.pack('<HHBBBB', 0xffff, tls & 0xffff,
+                                     (tls >> 16) & 255, 0xf2, 0xcf, tls >> 24)
+            self.uc.mem_write(0xd00000 + 8, struct.pack('<HHBBBB', 0xffff, 0, 0, 0x92, 0xcf, 0))
+            self.uc.mem_write(0xd00000 + 16, struct.pack('<HHBBBB', 0xffff, 0, 0, 0x9a, 0xcf, 0))
+            self.uc.mem_write(0xd00000 + 24, descriptor)
+            self.uc.reg_write(UC_X86_REG_GDTR, (0, 0xd00000, 0x1000, 0))
+            for register in (UC_X86_REG_DS, UC_X86_REG_ES, UC_X86_REG_SS):
+                self.uc.reg_write(register, 8)
+            self.uc.reg_write(UC_X86_REG_CS, 16)
+            self.uc.reg_write(UC_X86_REG_GS, 27)
         if self.bits == 32:
             phoff, shoff = struct.unpack_from('<II', data, 28)
             phsize, phnum, shsize, shnum, _ = struct.unpack_from('<5H', data, 42)
@@ -116,9 +147,56 @@ class Replay:
                     raise ValueError(f'Unsupported relocation {typ} on machine {self.machine}')
                 self.uc.mem_write(self.BASE + offset, struct.pack(ptrfmt, result & mask))
         self.import_names = {v: k for k, v in imports.items()}
+        self.memory_shim_calls = Counter()
         def trap(uc, address, size, user):
+            name = self.import_names.get(address)
+            if memory_imports and name in ('memset', '__memset_chk', '__aeabi_memclr', '__aeabi_memclr4', '__aeabi_memclr8'):
+                args = self.arguments(4 if name == '__memset_chk' else 3)
+                dest, value, length = args[:3] if name in ('memset', '__memset_chk') else (args[0], 0, args[1])
+                if name == '__memset_chk' and length > args[3]:
+                    raise RuntimeError('Fortified memset bounds check failed')
+                if length > 65536:
+                    raise RuntimeError('Memory shim exceeds test budget')
+                uc.mem_write(dest, bytes([value & 255]) * length)
+                self.memory_shim_calls[name] += 1
+                self.return_from_call(dest)
+                return
+            if memory_imports and name in ('memcpy', '__memcpy_chk', '__aeabi_memcpy', '__aeabi_memcpy4', '__aeabi_memcpy8'):
+                args = self.arguments(4 if name == '__memcpy_chk' else 3)
+                dest, source, length = args[:3]
+                if length > 65536 or (name == '__memcpy_chk' and length > args[3]):
+                    raise RuntimeError('Memory copy shim exceeds bounds/budget')
+                uc.mem_write(dest, bytes(uc.mem_read(source, length)))
+                self.memory_shim_calls[name] += 1
+                self.return_from_call(dest)
+                return
             raise RuntimeError(f'Unresolved import reached: {self.import_names.get(address, hex(address))}')
         self.uc.hook_add(UC_HOOK_CODE, trap, begin=self.IMPORTS, end=self.IMPORTS + 0xffff)
+
+    def arguments(self, count):
+        if self.machine == 3:
+            return struct.unpack('<' + 'I' * count, self.uc.mem_read(self.uc.reg_read(UC_X86_REG_ESP) + 4, count * 4))
+        regs = {62: (UC_X86_REG_RDI, UC_X86_REG_RSI, UC_X86_REG_RDX, UC_X86_REG_RCX),
+                40: (UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3),
+                183: (UC_ARM64_REG_X0, UC_ARM64_REG_X1, UC_ARM64_REG_X2, UC_ARM64_REG_X3)}[self.machine]
+        if count > len(regs): raise ValueError('Too many register arguments for helper')
+        return tuple(self.uc.reg_read(r) for r in regs[:count])
+
+    def return_from_call(self, value):
+        if self.machine in (3, 62):
+            ptr = 4 if self.machine == 3 else 8
+            spreg = UC_X86_REG_ESP if ptr == 4 else UC_X86_REG_RSP
+            sp = self.uc.reg_read(spreg)
+            ret = int.from_bytes(self.uc.mem_read(sp, ptr), 'little')
+            self.uc.reg_write(spreg, sp + ptr)
+            self.uc.reg_write(UC_X86_REG_EAX if ptr == 4 else UC_X86_REG_RAX, value)
+            self.uc.reg_write(UC_X86_REG_EIP if ptr == 4 else UC_X86_REG_RIP, ret)
+        elif self.machine == 40:
+            self.uc.reg_write(UC_ARM_REG_R0, value)
+            self.uc.reg_write(UC_ARM_REG_PC, self.uc.reg_read(UC_ARM_REG_LR))
+        else:
+            self.uc.reg_write(UC_ARM64_REG_X0, value)
+            self.uc.reg_write(UC_ARM64_REG_PC, self.uc.reg_read(UC_ARM64_REG_LR))
 
     def invoke(self, name, *args):
         if name not in self.symbols:

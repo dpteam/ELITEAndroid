@@ -71,6 +71,24 @@ uint32_t elite_geometry_checksum(void) {
         geometry += '    }\n'
     geometry += '    return hash;\n}\n'
     write('geometry_checksum.c', banner + geometry)
+    models = re.findall(r'const\s+shipheader_t\s+(\w+)\s*=', visible_shipdata)
+    registry = '#include "elite_mesh.h"\n'
+    for name in models:
+        registry += f'extern const shipheader_t {name};\n'
+    registry += 'static const shipheader_t * const models[] = {\n'
+    registry += ''.join(f'    &{name},\n' for name in models) + '};\n'
+    registry += 'static const char * const names[] = {\n'
+    registry += ''.join(f'    "{name}",\n' for name in models) + '};\n'
+    registry += '''
+uint32_t elite_model_count(void) { return sizeof(models) / sizeof(models[0]); }
+const shipheader_t *elite_model_at(uint32_t index) {
+    return index < elite_model_count() ? models[index] : 0;
+}
+const char *elite_model_name(uint32_t index) {
+    return index < elite_model_count() ? names[index] : 0;
+}
+'''
+    write('model_registry.c', banner + registry)
     write('upstream-readme.txt', read('readme.txt'))
 
     motion = read('motion.c')
@@ -95,7 +113,8 @@ uint32_t elite_geometry_checksum(void) {
             'ship_flags declaration -> extern for modern -fno-common toolchains',
             'norm: APK-compatible zero-length guard and portable sqrt',
             'norm_big: explicit zero-vector guard (intentional safety fix)',
-            'Only math/autopilot functions listed in scripts/prepare_native.py are imported; no hardware stubs.']}, indent=2) + '\n')
+            'Only math/autopilot functions listed in scripts/prepare_native.py are imported; no hardware stubs.',
+            'Model registry generated only from uncommented shipheader_t definitions.']}, indent=2) + '\n')
     print(f'Imported gameplay data and math into {dest}')
 
 
