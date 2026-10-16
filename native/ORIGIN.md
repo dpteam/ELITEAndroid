@@ -20,3 +20,12 @@ replaced with dummy implementations.
 The selected math functions are compiled with 32-bit fixed-point vectors,
 signed plain char, and defined two's-complement signed arithmetic wrapping
 (`-fwrapv`) to avoid LP64 data-model drift.
+
+`motion_object.c` imports `mveit` and `rotate`, replacing globals with an
+explicit motion-state argument. `control_helpers.c` imports only dampen/bump/
+redu helpers; `player_profiles.c` imports only the 15 player-profile records.
+The Android-specific control order in `native/src/elite_flight.c` was
+reconciled with the supplied APK's `update_motion`/`dampen_controls`, not
+assumed identical to the older GBA code. `native/src/elite_scene.c` is a new
+test harness (one stationary target and synthetic reference points), not a
+recovered original game scene or `update_universe` replacement.

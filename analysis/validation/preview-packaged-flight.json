@@ -1,0 +1,70 @@
+{
+  "original_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
+  "packaged_apk_sha256": "fd5d3ef59e590e878034b3974b685f1f49b3c5e55033862633899c9c3ab0bec8",
+  "random_seed": "0xe117f",
+  "samples": 300,
+  "control_ticks_per_profile": 200,
+  "abis": {
+    "armeabi-v7a": {
+      "status": "passed",
+      "checks": {
+        "profile_bytes": 15,
+        "control_tick": 3000,
+        "mveit_tick": 300,
+        "mveit_continuous_tick": 1200,
+        "scene_reset": 1,
+        "scene_tick": 600
+      },
+      "sha256": "3d005fa156a91bee7621b56d5e8a90af9b37b0d3acf8e68ca1808d7e62ff5640"
+    },
+    "arm64-v8a": {
+      "status": "passed",
+      "checks": {
+        "profile_bytes": 15,
+        "control_tick": 3000,
+        "mveit_tick": 300,
+        "mveit_continuous_tick": 1200,
+        "scene_reset": 1,
+        "scene_tick": 600,
+        "cross_abi_scene_trace": 1
+      },
+      "sha256": "b3d1ea97a539a38f43d4f04b75e6aeb88a6834e7afaca024249832e0684a96d2"
+    },
+    "x86": {
+      "status": "passed",
+      "checks": {
+        "profile_bytes": 15,
+        "control_tick": 3000,
+        "mveit_tick": 300,
+        "mveit_continuous_tick": 1200,
+        "scene_reset": 1,
+        "scene_tick": 600,
+        "cross_abi_scene_trace": 1
+      },
+      "sha256": "26d9c7b3792ae8feb84dd448ef0ed0c028a5aef3f104da0939f3c0957e9f21f6"
+    },
+    "x86_64": {
+      "status": "passed",
+      "checks": {
+        "profile_bytes": 15,
+        "control_tick": 3000,
+        "mveit_tick": 300,
+        "mveit_continuous_tick": 1200,
+        "scene_reset": 1,
+        "scene_tick": 600,
+        "cross_abi_scene_trace": 1
+      },
+      "sha256": "b64726b3e848469db731a54be6091a818d4d8031a821a36b336090f44a8680f4"
+    }
+  },
+  "limitations": [
+    "Object-level movement and control math only, not update_universe, collisions, AI, rendering or a complete flight game.",
+    "Original platform_get_tilt is explicitly replaced with supplied integer test input; no sensor/JNI/Android runtime is executed.",
+    "Only bounded valid poses and game-like speed/control inputs; invalid-input safety is covered separately by C tests.",
+    "Fire-laser callbacks and button/menu polling are excluded; all unhandled external calls trap.",
+    "New test-scene traces are compared between rebuilt ABIs, not to an original game scene: scheduling and synthetic reference stars are new code.",
+    "Bounded memory-copy/clearing shims and test TLS are supplied for the compiled code; no game/control math is shimmed."
+  ],
+  "original_tilt_boundary_calls": 10260,
+  "status": "passed"
+}

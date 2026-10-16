@@ -85,3 +85,18 @@ stack canaries. See the retained JSON for full limits.
 viewer. This is a visual test application and must not be mistaken for the
 full native game rebuild. The next integration work remains the game state,
 full simulation/menus, HUD/sprites/effects and persistence/audio callbacks.
+
+## Control / motion checkpoint
+
+`elite_flight.c` adds explicit int32 control state, profile limits, Android
+tilt/clamping and queued-acceleration ordering. Imported `mveit` now takes
+explicit motion state instead of process globals. Differential replay checks
+the original Android control branch, all 15 profile records, individual
+movement ticks and continuous trajectories (periodic `tidy` included).
+
+`elite_scene.c` is a deliberately small new test scene. Its state is copied
+through byte-array snapshots (no untrusted raw-pointer JNI handles). Flight
+mode in `preview` uses the real motion subset with a stationary target,
+synthetic stars, a fixed 30Hz scheduler and test readouts. It is not the
+original AI/universe loop, menus, docking or HUD. Those remain integration
+work rather than a claimed release feature.

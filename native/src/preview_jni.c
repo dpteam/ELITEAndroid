@@ -1,5 +1,48 @@
 #include <jni.h>
 #include "elite_mesh.h"
+#include "elite_scene.h"
+
+static jbyteArray scene_bytes(JNIEnv *env, const elite_scene_state *scene) {
+    jbyteArray output = (*env)->NewByteArray(env, (jsize)sizeof(*scene));
+    if (output) (*env)->SetByteArrayRegion(env, output, 0, (jsize)sizeof(*scene), (const jbyte *)scene);
+    return output;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeFlight_reset(JNIEnv *env, jclass type, jint model, jint profile) {
+    (void)type;
+    elite_scene_state scene;
+    if (elite_scene_reset(&scene, (uint32_t)model, (uint32_t)profile) != ELITE_FLIGHT_OK) {
+        jclass error = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
+        if (error) (*env)->ThrowNew(env, error, "Invalid scene model/profile");
+        return NULL;
+    }
+    return scene_bytes(env, &scene);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeFlight_step(JNIEnv *env, jclass type,
+        jbyteArray input_state, jintArray input, jint ticks) {
+    (void)type;
+    if (!input_state || !input || (*env)->GetArrayLength(env, input_state) != (jsize)sizeof(elite_scene_state) ||
+        (*env)->GetArrayLength(env, input) != 9 || ticks < 0 || ticks > 4) {
+        jclass error = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
+        if (error) (*env)->ThrowNew(env, error, "Invalid flight snapshot/input");
+        return NULL;
+    }
+    elite_scene_state scene;
+    jint values[9];
+    (*env)->GetByteArrayRegion(env, input_state, 0, (jsize)sizeof(scene), (jbyte *)&scene);
+    (*env)->GetIntArrayRegion(env, input, 0, 9, values);
+    if ((*env)->ExceptionCheck(env)) return NULL;
+    elite_controls_input controls = {
+        values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8]
+    };
+    if (elite_scene_step(&scene, &controls, (uint32_t)ticks) != ELITE_FLIGHT_OK) {
+        jclass error = (*env)->FindClass(env, "java/lang/IllegalStateException");
+        if (error) (*env)->ThrowNew(env, error, "Native flight scene rejected input or state");
+        return NULL;
+    }
+    return scene_bytes(env, &scene);
+}
 
 JNIEXPORT jint JNICALL Java_elite_preview_NativeMesh_recommendedDistance(JNIEnv *env, jclass type, jint index) {
     (void)env; (void)type;

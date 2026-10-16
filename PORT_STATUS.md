@@ -20,6 +20,12 @@
 - Reconstructed a reentrant non-effect mesh-preparation path, compared 66 model
   descriptors in wireframe/solid/shaded modes against the original APK command
   stream on four ABIs, and built a separate GLES2/JNI graphics-test application.
+- Added a pointer-free Flight test scene with bounded control/object-motion
+  snapshots, including original tick ordering for queued acceleration; this is
+  a test harness, not the connected Elite game loop.
+- The Flight preview adds hold/drag steering, a throttle slider, pause/reset,
+  synthetic reference points and numeric state readouts. Its new 30Hz test
+  scheduler and UI have not been validated on an Android runtime/device.
 
 ## Separate graphics-test APK
 

@@ -37,7 +37,7 @@ def prepare(ref, dest):
         (dest / name).write_text(text, encoding='utf-8', newline='\n')
 
     banner = '/* Imported from Elite AGB 0.5.2; see native/ORIGIN.md and upstream-readme.txt. */\n'
-    for name in ('shipdata.h', 'motion.h', 'tactics.h', 'encyclo.h', 'colours.h', 'killvalues.h', 'c64_killvalues.h'):
+    for name in ('shipdata.h', 'motion.h', 'tactics.h', 'encyclo.h', 'colours.h', 'killvalues.h', 'c64_killvalues.h', 'upgrade.h'):
         text = read('includes/' + name)
         if name == 'motion.h':
             text = '#include <stdint.h>\n' + text
@@ -99,6 +99,34 @@ const char *elite_model_name(uint32_t index) {
         math += '\n' + text
     write('motion_math.c', banner + math)
 
+    movement = '#include "elite_flight.h"\n'
+    piece = function(motion, 'rotate')
+    piece = re.sub(r'void\s+rotate\s*\(vector32_t \* row\)',
+                   'static void rotate(vector32_t * row, const elite_motion_state *motion)', piece)
+    for old, new in (('g_alpha', 'alpha'), ('g_beta', 'beta')):
+        piece = re.sub(r'\b' + old + r'\b', 'motion->' + new, piece)
+    movement += piece + '\n'
+    piece = function(motion, 'mveit')
+    piece = re.sub(r'void\s+mveit\s*\(', 'void elite_mveit_raw(', piece)
+    piece = piece.replace('int ship_index)', 'int ship_index, elite_motion_state *motion)')
+    for old, new in (('g_alpha', 'alpha'), ('g_beta', 'beta'), ('g_delta', 'delta'),
+                     ('g_mcount', 'counter'), ('total_beta', 'total_beta')):
+        piece = re.sub(r'\b' + old + r'\b', 'motion->' + new, piece)
+    piece = re.sub(r'rotate\((&obj->rotmat\[\d\])\)', r'rotate(\1, motion)', piece)
+    write('motion_object.c', banner + movement + piece)
+
+    controls = read('input.c')
+    helpers = '#include "elite_flight.h"\n'
+    for name in ('dampen', 'bump', 'redu'):
+        helpers += function(controls, name) + '\n'
+    write('control_helpers.c', banner + helpers)
+
+    upgrade = read('upgrade.c')
+    # Only the typed player-profile initializer; no equipment/menu dependencies.
+    start = upgrade.index('const player_ship_t player_ship_data[15]')
+    end = upgrade.index('\n};', start) + 3
+    write('player_profiles.c', banner + '#include "upgrade.h"\n#include "encyclo.h"\n' + upgrade[start:end] + '\n')
+
     autopilot = read('autopilot.c')
     text = '#include <stdlib.h>\n#include "motion.h"\n#define ROTATE_AMOUNT 3\n#define X_ROW 0\n#define Y_ROW 1\n#define Z_ROW 2\n'
     for name in ('norm_big', 'fly_to_vector_final', 'fly_to_vector', 'flip_vect'):
@@ -113,9 +141,11 @@ const char *elite_model_name(uint32_t index) {
             'ship_flags declaration -> extern for modern -fno-common toolchains',
             'norm: APK-compatible zero-length guard and portable sqrt',
             'norm_big: explicit zero-vector guard (intentional safety fix)',
-            'Only math/autopilot functions listed in scripts/prepare_native.py are imported; no hardware stubs.',
+            'mveit/rotate: replace global motion state with explicit elite_motion_state argument',
+            'Only math/autopilot/movement/control helpers listed in scripts/prepare_native.py are imported; no hardware stubs.',
+            '15 player profile records imported without equipment/menu code',
             'Model registry generated only from uncommented shipheader_t definitions.']}, indent=2) + '\n')
-    print(f'Imported gameplay data and math into {dest}')
+    print(f'Imported geometry, profiles, math, motion and control helpers into {dest}')
 
 
 if __name__ == '__main__':

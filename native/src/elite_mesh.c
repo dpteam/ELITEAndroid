@@ -41,9 +41,11 @@ int elite_mesh_build(uint32_t model, const stellarobject_t *object,
     /* Keep the original bounded fixed-point domain; reject values which would
        overflow legacy int32 operations or make a singular camera vector hang. */
     for (unsigned r = 0; r < 3; ++r) {
-        if (object->rotmat[r].x < -0x6000 || object->rotmat[r].x > 0x6000 ||
-            object->rotmat[r].y < -0x6000 || object->rotmat[r].y > 0x6000 ||
-            object->rotmat[r].z < -0x6000 || object->rotmat[r].z > 0x6000)
+        // Motion can temporarily exceed the nominal 0x6000 unit between tidy()
+        // calls. Accept that bounded drift rather than blanking valid poses.
+        if (object->rotmat[r].x < -0x8000 || object->rotmat[r].x > 0x8000 ||
+            object->rotmat[r].y < -0x8000 || object->rotmat[r].y > 0x8000 ||
+            object->rotmat[r].z < -0x8000 || object->rotmat[r].z > 0x8000)
             return finish(frame, ELITE_MESH_INVALID);
     }
     const vector32_t loc = object->location;

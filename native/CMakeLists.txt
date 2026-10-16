@@ -14,9 +14,14 @@ endif()
 set(ELITE_CORE_SOURCES
     src/elite_core.c
     src/elite_mesh.c
+    src/elite_flight.c
+    src/elite_scene.c
     vendor/eliteagb/model_registry.c
     vendor/eliteagb/geometry_checksum.c
     vendor/eliteagb/motion_math.c
+    vendor/eliteagb/motion_object.c
+    vendor/eliteagb/control_helpers.c
+    vendor/eliteagb/player_profiles.c
     vendor/eliteagb/autopilot_math.c
     vendor/eliteagb/shipdata.c)
 add_library(elite_core_objects OBJECT ${ELITE_CORE_SOURCES})

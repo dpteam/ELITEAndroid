@@ -11,7 +11,7 @@
   "abis": {
     "armeabi-v7a": {
       "status": "passed",
-      "sha256": "667d2ccb4a03264f66579b616303d3de9605f75d9e21791f9bb135249de7e8c8",
+      "sha256": "d4805843e66460c02fa10b22d4fd87adf95c5eaf450278e635bda5282dec93fb",
       "checks": {
         "wireframe": 660,
         "solid": 660,
@@ -23,7 +23,7 @@
     },
     "arm64-v8a": {
       "status": "passed",
-      "sha256": "73263618c2cdb575deb609d77cee600d15fa9572747da2fd58df549205a8a9f3",
+      "sha256": "3c06aa7217e2b343a6f304b2bf4a78e8da4ebe52c3e38a5d5cd6356146ba9d76",
       "checks": {
         "wireframe": 660,
         "solid": 660,
@@ -35,7 +35,7 @@
     },
     "x86": {
       "status": "passed",
-      "sha256": "16697981a3e8e6ba137988098248e95eaab98d8eb19f0c18e95dfe9ba9d01c7f",
+      "sha256": "0a80cdff329a926207cf869b7ef86eacdee19eff5bb91332652a1ee97a31b175",
       "checks": {
         "wireframe": 660,
         "solid": 660,
@@ -47,7 +47,7 @@
     },
     "x86_64": {
       "status": "passed",
-      "sha256": "9a75fd39393df31883b2604bfd110db3cf0ada387c472ccf7554612fbdb7e49b",
+      "sha256": "d015e89eac7272213031ed9bcaa6d6c67dc3cdae55dbf08c600e060ac650600c",
       "checks": {
         "wireframe": 660,
         "solid": 660,

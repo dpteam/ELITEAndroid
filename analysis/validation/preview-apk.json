@@ -1,14 +1,54 @@
 {
   "status": "passed",
-  "apk_sha256": "86b8ca9a54a34e5c599d75dd2ccb11d1e738c67f3896014a9c6b173867d9c773",
-  "apk_bytes": 684122,
+  "apk_sha256": "fd5d3ef59e590e878034b3974b685f1f49b3c5e55033862633899c9c3ab0bec8",
+  "apk_bytes": 1151114,
   "application": "elite.preview \u2014 separate mesh test, not the game",
   "libraries": {
     "lib/arm64-v8a/libelite_core.so": {
-      "sha256": "f111bc43c31638c05eab2499980d226d4ba9def2dd4112b5a977712b949d224e",
-      "bytes": 155056,
+      "sha256": "b3d1ea97a539a38f43d4f04b75e6aeb88a6834e7afaca024249832e0684a96d2",
+      "bytes": 163904,
       "elf_class": 64,
       "machine": 183,
+      "textrel": false,
+      "zip_data_offset": 655360,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/arm64-v8a/libelite_preview.so": {
+      "sha256": "7924e2acd10de341b4547c4088352c444a91906a168ea73ac9de752943d1be43",
+      "bytes": 8760,
+      "elf_class": 64,
+      "machine": 183,
+      "textrel": false,
+      "zip_data_offset": 196608,
+      "segments": [
+        {
+          "flags": 5,
+          "alignment": 16384
+        },
+        {
+          "flags": 6,
+          "alignment": 16384
+        }
+      ]
+    },
+    "lib/armeabi-v7a/libelite_core.so": {
+      "sha256": "3d005fa156a91bee7621b56d5e8a90af9b37b0d3acf8e68ca1808d7e62ff5640",
+      "bytes": 115708,
+      "elf_class": 32,
+      "machine": 40,
       "textrel": false,
       "zip_data_offset": 16384,
       "segments": [
@@ -26,53 +66,13 @@
         }
       ]
     },
-    "lib/arm64-v8a/libelite_preview.so": {
-      "sha256": "2634cced2f602858a979848d7a9d815d2df98ad2850aa43493f9290c2c2b435d",
-      "bytes": 7176,
-      "elf_class": 64,
-      "machine": 183,
-      "textrel": false,
-      "zip_data_offset": 655360,
-      "segments": [
-        {
-          "flags": 5,
-          "alignment": 16384
-        },
-        {
-          "flags": 6,
-          "alignment": 16384
-        }
-      ]
-    },
-    "lib/armeabi-v7a/libelite_core.so": {
-      "sha256": "0bceb3cf11967ea2af4b767504823944bcb4b3839eb6cd6b63131aa2e3d55051",
-      "bytes": 110012,
-      "elf_class": 32,
-      "machine": 40,
-      "textrel": false,
-      "zip_data_offset": 196608,
-      "segments": [
-        {
-          "flags": 5,
-          "alignment": 16384
-        },
-        {
-          "flags": 6,
-          "alignment": 16384
-        },
-        {
-          "flags": 6,
-          "alignment": 16384
-        }
-      ]
-    },
     "lib/armeabi-v7a/libelite_preview.so": {
-      "sha256": "bd5b32d5e16c721d7d9c88752ea0e1998f20d32d68beadbed946bade8cd9886e",
-      "bytes": 4868,
+      "sha256": "e8f007f79febc2838c0bafca5a8c0b234cb2ab21c92f073bd4d5908c957f0407",
+      "bytes": 5884,
       "elf_class": 32,
       "machine": 40,
       "textrel": false,
-      "zip_data_offset": 180224,
+      "zip_data_offset": 344064,
       "segments": [
         {
           "flags": 5,
@@ -85,12 +85,12 @@
       ]
     },
     "lib/x86/libelite_core.so": {
-      "sha256": "8c5eca9a59256c08b65907e9fc181910f03ed5ce47c272694d636db471cae307",
-      "bytes": 128744,
+      "sha256": "26d9c7b3792ae8feb84dd448ef0ed0c028a5aef3f104da0939f3c0957e9f21f6",
+      "bytes": 137132,
       "elf_class": 32,
       "machine": 3,
       "textrel": false,
-      "zip_data_offset": 327680,
+      "zip_data_offset": 835584,
       "segments": [
         {
           "flags": 5,
@@ -107,12 +107,12 @@
       ]
     },
     "lib/x86/libelite_preview.so": {
-      "sha256": "5187de22fa15095cbc520e3b6dc553115e12b3da2439573dbc9da9973dfbc547",
-      "bytes": 5960,
+      "sha256": "80d075d5ba9e4c2f575e4a9ba5e16cf228dffaada3a3da46697906d641f0e5ac",
+      "bytes": 7664,
       "elf_class": 32,
       "machine": 3,
       "textrel": false,
-      "zip_data_offset": 638976,
+      "zip_data_offset": 507904,
       "segments": [
         {
           "flags": 5,
@@ -125,12 +125,12 @@
       ]
     },
     "lib/x86_64/libelite_core.so": {
-      "sha256": "40bcdc90288373b58f3b2ec1cc8238046838f176925c608ff8b86807e9cba002",
-      "bytes": 154752,
+      "sha256": "b64726b3e848469db731a54be6091a818d4d8031a821a36b336090f44a8680f4",
+      "bytes": 162816,
       "elf_class": 64,
       "machine": 62,
       "textrel": false,
-      "zip_data_offset": 475136,
+      "zip_data_offset": 983040,
       "segments": [
         {
           "flags": 5,
@@ -147,12 +147,12 @@
       ]
     },
     "lib/x86_64/libelite_preview.so": {
-      "sha256": "7f162ecab60fc34bc082a23ef6703f15c8d7d6fd8e8ec4060850797023c9e9f1",
-      "bytes": 7120,
+      "sha256": "a1ca9ea5c99f6a47da57606cb94a84a51f82311e815720f974d4d30c1533865f",
+      "bytes": 8912,
       "elf_class": 64,
       "machine": 62,
       "textrel": false,
-      "zip_data_offset": 671744,
+      "zip_data_offset": 524288,
       "segments": [
         {
           "flags": 5,

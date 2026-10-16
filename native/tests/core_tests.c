@@ -1,5 +1,6 @@
 #include "elite_core.h"
 #include "elite_mesh.h"
+#include "elite_scene.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -77,6 +78,45 @@ int main(void) {
     CHECK(elite_mesh_build(model, &ship, 1, &frame) == ELITE_MESH_EFFECT_UNSUPPORTED);
     ship = before; memset(ship.rotmat, 0, sizeof ship.rotmat);
     CHECK(elite_mesh_build(model, &ship, 1, &frame) == ELITE_MESH_INVALID);
+    elite_scene_state scene;
+    CHECK(elite_scene_size() == sizeof scene && elite_scene_size() == 912);
+    CHECK(elite_scene_reset(&scene, model, 2) == ELITE_FLIGHT_OK);
+    CHECK(scene.magic == ELITE_SCENE_MAGIC && scene.ticks == 0 && scene.fault == 0);
+    elite_controls_input flight = {0, 1, 0, 0, 1, 0, 0, 0, 0};
+    CHECK(elite_scene_step(&scene, &flight, 1) == ELITE_FLIGHT_OK);
+    CHECK(scene.ticks == 1 && scene.fault == 0);
+    CHECK(elite_scene_step(&scene, &flight, 4) == ELITE_FLIGHT_OK);
+    CHECK(scene.ticks == 5);
+    CHECK(elite_scene_step(&scene, &flight, 5) == ELITE_FLIGHT_INVALID);
+    scene.magic = 0;
+    CHECK(elite_scene_step(&scene, &flight, 1) == ELITE_FLIGHT_INVALID);
+    CHECK(elite_controls_reset(NULL, 8) == ELITE_FLIGHT_INVALID);
+    elite_controls_state controls = {0};
+    elite_controls_input invalid = {0};
+    CHECK(elite_controls_reset(&controls, -1) == ELITE_FLIGHT_INVALID);
+    CHECK(elite_controls_reset(&controls, 8) == ELITE_FLIGHT_OK);
+    elite_controls_state copy = controls;
+    invalid.tilt_roll = INT32_MIN;
+    CHECK(elite_controls_step(&controls, &invalid, 0) == ELITE_FLIGHT_INVALID);
+    CHECK(memcmp(&copy, &controls, sizeof copy) == 0);
+    invalid.tilt_roll = 0; invalid.accel = 1;
+    CHECK(elite_controls_step(&controls, &invalid, 0) == ELITE_FLIGHT_OK);
+    CHECK(controls.speed == 8 && controls.pending_accel == 1);
+    invalid.accel = 0;
+    CHECK(elite_controls_step(&controls, &invalid, 0) == ELITE_FLIGHT_OK);
+    CHECK(controls.speed == 9 && controls.pending_accel == 0);
+    CHECK(elite_profile_at(15) == NULL);
+    ship = before;
+    elite_motion_state motion = {0, 0, 8, 255, 0};
+    CHECK(elite_object_step(model, &ship, &motion, 2) == ELITE_FLIGHT_OK);
+    CHECK(ship.location.z == before.location.z - 8);
+    ship.rotmat[1] = ship.rotmat[2];
+    stellarobject_t bad_ship = ship;
+    CHECK(elite_object_step(model, &ship, &motion, 2) == ELITE_FLIGHT_INVALID);
+    CHECK(memcmp(&ship, &bad_ship, sizeof ship) == 0);
+    CHECK(elite_scene_reset(&scene, model, 0) == ELITE_FLIGHT_OK);
+    scene.stars[0].x = INT32_MIN;
+    CHECK(elite_scene_step(&scene, &flight, 1) == ELITE_FLIGHT_INVALID);
     printf("geometry_checksum=%08x\n", elite_geometry_checksum());
     printf("OK: layouts, 100000 square roots, seed, rotation, autopilot, mesh and invalid-input guards\n");
     return 0;

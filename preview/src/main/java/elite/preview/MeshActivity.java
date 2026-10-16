@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.SeekBar;
+import android.widget.HorizontalScrollView;
 
 /** Separate visual validation app. No menu/gameplay/save code is replaced. */
 public final class MeshActivity extends Activity {
@@ -45,7 +47,7 @@ public final class MeshActivity extends Activity {
         title.setTextColor(0xffffffff);
         panel.addView(title);
         TextView notice = new TextView(this);
-        notice.setText("GRAPHICS TEST — NOT THE GAME · Drag to rotate");
+        notice.setText("TEST — NOT THE GAME · Drag: rotate / hold to steer in Flight · No collisions");
         notice.setTextColor(0xffffd86b);
         panel.addView(notice);
         renderState = new TextView(this);
@@ -60,8 +62,29 @@ public final class MeshActivity extends Activity {
             mesh.flags = mode == 0 ? 0 : mode == 1 ? 1 : 3;
             updateTitle();
         });
+        button(controls, "Flight", v -> {
+            mesh.flightMode = !mesh.flightMode;
+            mesh.resetFlight();
+            updateTitle();
+        });
         button(controls, "Pause", v -> mesh.rotating = !mesh.rotating);
-        panel.addView(controls);
+        button(controls, "Reset", v -> mesh.resetFlight());
+        HorizontalScrollView controlScroll = new HorizontalScrollView(this);
+        controlScroll.addView(controls);
+        panel.addView(controlScroll);
+        TextView throttleLabel = new TextView(this);
+        throttleLabel.setText("Flight throttle target (Adder profile): 1…36");
+        throttleLabel.setTextColor(0xffb0d8ff);
+        panel.addView(throttleLabel);
+        SeekBar throttle = new SeekBar(this);
+        throttle.setMax(35);
+        throttle.setProgress(7);
+        throttle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int value, boolean user) { mesh.throttleTarget = value + 1; }
+            @Override public void onStartTrackingTouch(SeekBar bar) {}
+            @Override public void onStopTrackingTouch(SeekBar bar) {}
+        });
+        panel.addView(throttle);
         FrameLayout.LayoutParams layout = new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
         root.addView(panel, layout);
@@ -85,14 +108,14 @@ public final class MeshActivity extends Activity {
     }
     private void updateTitle() {
         title.setText((selected + 1) + "/" + models.length + "  " + models[selected]
-            + " · " + new String[]{"Wireframe", "Solid", "Shaded"}[mode]);
+            + " · " + (mesh != null && mesh.flightMode ? "Flight test" : new String[]{"Wireframe", "Solid", "Shaded"}[mode]));
     }
     @Override public void onResume() {
         super.onResume();
-        if (mesh != null) mesh.onResume();
+        if (mesh != null) { mesh.onResume(); mesh.clearFlightInput(); }
     }
     @Override public void onPause() {
-        if (mesh != null) mesh.onPause();
+        if (mesh != null) { mesh.clearFlightInput(); mesh.onPause(); }
         super.onPause();
     }
 }
