@@ -1,0 +1,89 @@
+{
+  "scope": "Station math and transaction state only, not original UI/lifecycle/save/jump behavior.",
+  "original_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
+  "packaged_apk_sha256": "8f56c3c4bc89f7d7230604a860383d65718ae73bc3211722b62579c4a41fd620",
+  "abis": {
+    "armeabi-v7a": {
+      "status": "passed",
+      "checks": {
+        "state_size": 1,
+        "default_commander_bytes": 1,
+        "market_control_bytes": 1,
+        "market": 2048,
+        "seed_status": 256,
+        "system_seed": 256,
+        "system_info": 256,
+        "system_name": 256,
+        "nearest": 53,
+        "trade": 1000
+      },
+      "sha256": "12a162d8b4ff4481434f363ea713b3599d0d849d153c933dc696f9f438eab017"
+    },
+    "arm64-v8a": {
+      "status": "passed",
+      "checks": {
+        "state_size": 1,
+        "default_commander_bytes": 1,
+        "market_control_bytes": 1,
+        "market": 2048,
+        "seed_status": 256,
+        "system_seed": 256,
+        "system_info": 256,
+        "system_name": 256,
+        "nearest": 53,
+        "trade": 1000
+      },
+      "sha256": "3bfc30a88af895ccbe25361d5265cabacee3ccdfbd1661fb27fdc515979b47cf"
+    },
+    "x86": {
+      "status": "passed",
+      "checks": {
+        "state_size": 1,
+        "default_commander_bytes": 1,
+        "market_control_bytes": 1,
+        "market": 2048,
+        "seed_status": 256,
+        "system_seed": 256,
+        "system_info": 256,
+        "system_name": 256,
+        "nearest": 53,
+        "trade": 1000
+      },
+      "sha256": "8a8107e58c65b2c87500de1d5841aa80e58764320a4ecbdbb59cbdff72e1798e"
+    },
+    "x86_64": {
+      "status": "passed",
+      "checks": {
+        "state_size": 1,
+        "default_commander_bytes": 1,
+        "market_control_bytes": 1,
+        "market": 2048,
+        "seed_status": 256,
+        "system_seed": 256,
+        "system_info": 256,
+        "system_name": 256,
+        "nearest": 53,
+        "trade": 1000
+      },
+      "sha256": "0cc85db49534936a6f8f712fd0b8e070a92daf1cc5ec650f55f88775f67e65d2"
+    }
+  },
+  "limitations": [
+    "Original trade wrappers are replayed with explicit UI/audio boundary interception.",
+    "UI layout query platform_screen_size is supplied a fixed 256x192; no renderer is initialized.",
+    "Name comparison captures original text digram tokens and decodes QQ16, not the full text renderer.",
+    "Market values exhaustive for 8 economies and 256 random bytes; transactions are bounded sampled states.",
+    "Overflow guards intentionally reject legacy uint8/credit wrapping and are not claimed equivalent.",
+    "No Android runtime, persistence, trade UI, hyperspace transition, mission or legal-status effects observed."
+  ],
+  "original_boundary_calls": {
+    "text2buffer": 831,
+    "platform_screen_size": 1,
+    "clear_row": 564,
+    "set_text_x": 564,
+    "show_stock": 564,
+    "update_cash": 564,
+    "play_sound": 564
+  },
+  "status": "passed"
+}

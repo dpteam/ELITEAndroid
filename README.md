@@ -30,6 +30,8 @@ for a modern Android loader or a 64-bit-only device.
 The `preview/` module is **not the game**. It uses rebuilt native mesh code,
 provides a GLES2 model viewer, and has its own package name (`elite.preview`).
 It packages ARMv7, ARM64, x86, and x86_64 libraries without replacing `elite.app`.
+It also contains separate Flight and Station core-test screens: movement and
+market state are exercised independently, not as a connected playable game.
 
 ```text
 python scripts/prepare_native.py

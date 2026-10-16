@@ -1,6 +1,7 @@
 #include "elite_core.h"
 #include "elite_mesh.h"
 #include "elite_scene.h"
+#include "elite_station.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -90,6 +91,42 @@ int main(void) {
     CHECK(elite_scene_step(&scene, &flight, 5) == ELITE_FLIGHT_INVALID);
     scene.magic = 0;
     CHECK(elite_scene_step(&scene, &flight, 1) == ELITE_FLIGHT_INVALID);
+    elite_station_state station;
+    CHECK(elite_station_size() == 204);
+    CHECK(elite_station_reset(&station) == 0);
+    CHECK(station.magic == ELITE_STATION_MAGIC && station.version == 1 && station.docked == 1);
+    CHECK(strcmp(station.system_name, "LAVE") == 0);
+    CHECK(station.commander.cash == 5000 && station.commander.cargo_space == 9);
+    CHECK(station.commander.cpl_coord.x == 20 && station.commander.cpl_coord.y == 173);
+    CHECK(station.commander.station_cargo[16] == 0);
+    uint32_t price = station.prices[0];
+    uint8_t stock_count = station.commander.station_cargo[0];
+    CHECK(stock_count > 0);
+    CHECK(elite_station_trade(&station, 0, 1) == ELITE_TRADE_OK);
+    CHECK(station.commander.cash == 5000 - price && station.commander.cargo[0] == 1);
+    CHECK(station.commander.station_cargo[0] == stock_count - 1);
+    CHECK(elite_station_trade(&station, 0, 0) == ELITE_TRADE_OK);
+    CHECK(station.commander.cash == 5000 && station.commander.cargo[0] == 0);
+    CHECK(elite_station_trade(&station, 0, 0) == ELITE_TRADE_NO_CARGO);
+    CHECK(elite_station_trade(&station, 17, 1) == ELITE_TRADE_INVALID);
+    CHECK(elite_station_trade(&station, 16, 1) == ELITE_TRADE_NO_STOCK);
+    station.commander.cash = 0;
+    CHECK(elite_station_trade(&station, 0, 1) == ELITE_TRADE_NO_CASH);
+    station.commander.cash = 5000; station.commander.cargo[0] = 9;
+    commander_t cargo_before = station.commander;
+    CHECK(elite_station_trade(&station, 0, 1) == ELITE_TRADE_FULL);
+    CHECK(memcmp(&station.commander, &cargo_before, sizeof cargo_before) == 0);
+    station.commander.cash = UINT32_MAX;
+    CHECK(elite_station_trade(&station, 0, 0) == ELITE_TRADE_OVERFLOW);
+    station.commander.cash = 5000; station.docked = 0;
+    CHECK(elite_station_trade(&station, 0, 0) == ELITE_TRADE_NOT_DOCKED);
+    station.docked = 1; station.commander.cargo[0] = 0; station.commander.cargo[13] = 255;
+    CHECK(elite_cargo_tonnes(&station.commander) == 0);
+    CHECK(elite_station_trade(&station, 13, 1) == ELITE_TRADE_OVERFLOW);
+    station.commander.cargo[3] = 2; station.commander.cargo[6] = 3; station.commander.cargo[10] = 4;
+    CHECK(elite_cargo_illegal(&station.commander) == 14);
+    CHECK(elite_market_generate(8, 0, station.prices, station.commander.station_cargo) == -1);
+    CHECK(elite_system_seed(&station.commander.gal_seed, 256, &station.system) == -1);
     CHECK(elite_controls_reset(NULL, 8) == ELITE_FLIGHT_INVALID);
     elite_controls_state controls = {0};
     elite_controls_input invalid = {0};
@@ -118,6 +155,6 @@ int main(void) {
     scene.stars[0].x = INT32_MIN;
     CHECK(elite_scene_step(&scene, &flight, 1) == ELITE_FLIGHT_INVALID);
     printf("geometry_checksum=%08x\n", elite_geometry_checksum());
-    printf("OK: layouts, 100000 square roots, seed, rotation, autopilot, mesh and invalid-input guards\n");
+    printf("OK: layouts, sqrt, seed, autopilot, mesh, flight, station and invalid-input/overflow guards\n");
     return 0;
 }

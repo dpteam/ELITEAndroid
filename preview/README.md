@@ -24,6 +24,10 @@ no access to the original game's private saves.
   GLES1 driver.
 - Shows native-frame statuses and GL error codes rather than treating an
   unsupported mesh as successful rendering.
+- The `Station` button opens a separate new test UI over actual rebuilt
+  commander/system/market math: Lave data, credits, cargo, prices, stock and
+  one-unit buy/sell. It has independent in-memory state from the Flight scene;
+  switching screens is **not** docking/launching in a connected universe.
 
 ## Build
 
@@ -44,9 +48,11 @@ adb -s DEVICE_SERIAL install -r preview/build/outputs/apk/debug/preview-debug.ap
 adb -s DEVICE_SERIAL shell am start -n elite.preview/.MeshActivity
 ```
 
-Do not mistake this for a release of the game. There is no trade, complete
-flight simulation, HUD, menu system, audio or save/load in this module. The
-Flight button is a bounded movement test, not the connected game loop.
+Do not mistake this for a release of the game. There is no complete flight
+simulation, original HUD/menu system, audio or disk save/load in this module.
+The Flight button is a bounded movement test, not the connected game loop.
+The Station button exercises market transactions in a separate snapshot, not
+missions, travel, equipment, launch/docking or complete station gameplay.
 
 ## Checks already performed
 
@@ -66,6 +72,10 @@ Flight button is a bounded movement test, not the connected game loop.
   extracted directly from the preview APK passed. See
   `analysis/validation/preview-packaged-mesh.json` (includes the APK digest).
 - Preview APK signature verified with SDK `apksigner`.
+- Station math comparison against original code: all 2048 market inputs,
+  256 systems/names/info, nearest-system queries and 1000 trade snapshots per
+  ABI. Overflow rejection is an intentional safety improvement tested in C,
+  not an assertion of equivalence to old counter-wrapping behavior.
 - SDK `zipalign -c -P 16` passed; static packaged-library checks passed for all
   8 ELF files. See `analysis/validation/preview-apk.json`.
 
@@ -80,6 +90,7 @@ Reproduce exact packaged-library comparisons with Python and Unicorn 2.1.4:
 python scripts/test_mesh_replay.py --packaged-apk preview/build/outputs/apk/debug/preview-debug.apk --samples 3 --output analysis/validation/preview-packaged-mesh.json
 python scripts/verify_preview_apk.py
 python scripts/test_flight_replay.py --packaged-apk preview/build/outputs/apk/debug/preview-debug.apk --output analysis/validation/preview-packaged-flight.json
+python scripts/test_station_replay.py --packaged-apk preview/build/outputs/apk/debug/preview-debug.apk --output analysis/validation/preview-packaged-station.json
 ```
 
 ## Known scope limitations
@@ -99,4 +110,10 @@ release recenters input; throttle changes speed; Pause freezes ticks; Reset
 restores the scene; background/restore does not advance hidden simulation or
 leave a stuck input. Flying past/away from the target can cull the model; this
 does not respawn or fake it, so use Reset to bring it back. No collision,
-docking, AI, trade, weapon or save functionality is claimed.
+docking, AI, trade, weapon or save functionality is claimed for the Flight scene.
+
+For Station testing: buy and sell Food and Minerals; verify exact balance,
+stock and cargo changes; exhaust the hold; attempt purchases without funds or
+stock; test kg/g goods; background/restore the Activity. Bundle restoration
+preserves the ephemeral Station screen snapshot, **not an original Elite save
+file**. No connection of station trades to the Flight scene is claimed.

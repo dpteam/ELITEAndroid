@@ -1,6 +1,39 @@
 #include <jni.h>
 #include "elite_mesh.h"
 #include "elite_scene.h"
+#include "elite_station.h"
+
+static jbyteArray station_bytes(JNIEnv *env, const elite_station_state *state) {
+    jbyteArray output = (*env)->NewByteArray(env, (jsize)sizeof(*state));
+    if (output) (*env)->SetByteArrayRegion(env, output, 0, (jsize)sizeof(*state), (const jbyte *)state);
+    return output;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeStation_reset(JNIEnv *env, jclass type) {
+    (void)type;
+    elite_station_state state;
+    if (elite_station_reset(&state)) {
+        jclass error = (*env)->FindClass(env, "java/lang/IllegalStateException");
+        if (error) (*env)->ThrowNew(env, error, "Could not initialize station snapshot");
+        return NULL;
+    }
+    return station_bytes(env, &state);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_elite_preview_NativeStation_trade(JNIEnv *env, jclass type,
+        jbyteArray snapshot, jint item, jboolean buy) {
+    (void)type;
+    if (!snapshot || (*env)->GetArrayLength(env, snapshot) != (jsize)sizeof(elite_station_state)) {
+        jclass error = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
+        if (error) (*env)->ThrowNew(env, error, "Invalid station snapshot length");
+        return NULL;
+    }
+    elite_station_state state;
+    (*env)->GetByteArrayRegion(env, snapshot, 0, (jsize)sizeof(state), (jbyte *)&state);
+    if ((*env)->ExceptionCheck(env)) return NULL;
+    elite_station_trade(&state, (uint32_t)item, buy == JNI_TRUE);
+    return station_bytes(env, &state);
+}
 
 static jbyteArray scene_bytes(JNIEnv *env, const elite_scene_state *scene) {
     jbyteArray output = (*env)->NewByteArray(env, (jsize)sizeof(*scene));

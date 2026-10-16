@@ -1,6 +1,7 @@
 package elite.preview;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -69,6 +70,7 @@ public final class MeshActivity extends Activity {
         });
         button(controls, "Pause", v -> mesh.rotating = !mesh.rotating);
         button(controls, "Reset", v -> mesh.resetFlight());
+        button(controls, "Station", v -> startActivity(new Intent(this, StationActivity.class)));
         HorizontalScrollView controlScroll = new HorizontalScrollView(this);
         controlScroll.addView(controls);
         panel.addView(controlScroll);

@@ -26,6 +26,14 @@
 - The Flight preview adds hold/drag steering, a throttle slider, pause/reset,
   synthetic reference points and numeric state readouts. Its new 30Hz test
   scheduler and UI have not been validated on an Android runtime/device.
+- Added a commander/navigation/market subset and a separate Station screen in
+  `elite.preview`: current system data, credit balance, cargo and one-unit
+  transactions. It is not the original station UI or a connected game state.
+- Commander layout is explicitly reconciled to the APK's 92 bytes: 15 equipment
+  slots versus 13 in older AGB source. Two extra equipment meanings are unknown.
+- Station validation covers all 2048 economy/market-random combinations,
+  256 systems in the first galaxy, nearest-system searches and sampled original
+  trade-wrapper state changes on four ABIs. See station replay reports.
 
 ## Separate graphics-test APK
 

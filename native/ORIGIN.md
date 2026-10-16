@@ -29,3 +29,11 @@ reconciled with the supplied APK's `update_motion`/`dampen_controls`, not
 assumed identical to the older GBA code. `native/src/elite_scene.c` is a new
 test harness (one stationary target and synthetic reference points), not a
 recovered original game scene or `update_universe` replacement.
+
+The station subset imports only the default commander initializer, market
+control table and QQ16 digrams from the corresponding reference modules.
+Its commander header is adjusted from 13 to 15 equipment slots to preserve
+the APK's 92-byte layout. The extra two slot meanings remain unknown. Market
+stock rules are reconciled with Android `calculate_market`, not blindly
+copied from the older GBA version. New station UI and snapshot wrapping do
+not claim to restore original menus, station lifecycle, saves or missions.

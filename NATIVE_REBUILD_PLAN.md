@@ -100,3 +100,18 @@ mode in `preview` uses the real motion subset with a stationary target,
 synthetic stars, a fixed 30Hz scheduler and test readouts. It is not the
 original AI/universe loop, menus, docking or HUD. Those remain integration
 work rather than a claimed release feature.
+
+## Commander / market checkpoint
+
+`elite_station.c` adds a pointer-free station snapshot and reconciles Android
+market generation and one-unit transactions. It preserves the original
+92-byte commander layout, including two unnamed extra equipment slots absent
+from AGB. The original stock generator, system seeds/names/info, nearest-system
+selection and trade-wrapper state are compared via offline replay. UI/audio
+callbacks are intercepted explicitly at their boundary; their behavior is not
+claimed restored. Intentional extra guards prevent uint8 cargo/stock and
+uint32 cash overflow rather than reproducing unsafe wrapping.
+
+The preview `StationActivity` is new UI over this state. Its transactions do
+not feed a flight commander yet, and opening/closing the screen is not a
+launch/dock transition. The snapshot is not an original save-file format.

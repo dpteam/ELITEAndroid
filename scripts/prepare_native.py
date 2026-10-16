@@ -37,7 +37,8 @@ def prepare(ref, dest):
         (dest / name).write_text(text, encoding='utf-8', newline='\n')
 
     banner = '/* Imported from Elite AGB 0.5.2; see native/ORIGIN.md and upstream-readme.txt. */\n'
-    for name in ('shipdata.h', 'motion.h', 'tactics.h', 'encyclo.h', 'colours.h', 'killvalues.h', 'c64_killvalues.h', 'upgrade.h'):
+    for name in ('shipdata.h', 'motion.h', 'tactics.h', 'encyclo.h', 'colours.h', 'killvalues.h', 'c64_killvalues.h', 'upgrade.h',
+                 'navigation.h', 'commander.h', 'market.h'):
         text = read('includes/' + name)
         if name == 'motion.h':
             text = '#include <stdint.h>\n' + text
@@ -45,6 +46,11 @@ def prepare(ref, dest):
         if name == 'shipdata.h':
             text = text.replace('const unsigned char ship_flags[32][2];', 'extern const unsigned char ship_flags[32][2];')
             text = text.replace('const unsigned char * ship_flags[23];', 'extern const unsigned char * ship_flags[23];')
+        if name == 'commander.h':
+            # APK stores fifteen equipment bytes at offsets 16..30, compared
+            # with thirteen in the older AGB header. Meaning of the last two
+            # slots is not established; preserve them without naming features.
+            text = re.sub(r'#define EQUIPMENT_LIST\s+13', '#define EQUIPMENT_LIST        15', text)
         write(name, banner + text)
     shipdata = read('shipdata.c')
     write('shipdata.c', banner + shipdata)
@@ -127,6 +133,19 @@ const char *elite_model_name(uint32_t index) {
     end = upgrade.index('\n};', start) + 3
     write('player_profiles.c', banner + '#include "upgrade.h"\n#include "encyclo.h"\n' + upgrade[start:end] + '\n')
 
+    status = read('status.c')
+    start = status.index('const commander_t default_commander =')
+    end = status.index('\n};', start) + 3
+    write('commander_default.c', banner + '#include "commander.h"\n' + status[start:end] + '\n')
+    market = read('market.c')
+    start = market.index('const prices_t market_control[] =')
+    end = market.index('\n};', start) + 3
+    write('market_data.c', banner + '#include "elite_station.h"\n' + market[start:end].replace('prices_t', 'elite_price_control') + '\n')
+    text = read('text.c')
+    pairs = re.search(r'const char \* QQ16\s*=\s*("[^"\n]*")\s*;', text)
+    if pairs is None: raise ValueError('Missing QQ16 digram table')
+    write('name_pairs.c', banner + 'const char elite_name_pairs[] = ' + pairs[1] + ';\n')
+
     autopilot = read('autopilot.c')
     text = '#include <stdlib.h>\n#include "motion.h"\n#define ROTATE_AMOUNT 3\n#define X_ROW 0\n#define Y_ROW 1\n#define Z_ROW 2\n'
     for name in ('norm_big', 'fly_to_vector_final', 'fly_to_vector', 'flip_vect'):
@@ -144,6 +163,8 @@ const char *elite_model_name(uint32_t index) {
             'mveit/rotate: replace global motion state with explicit elite_motion_state argument',
             'Only math/autopilot/movement/control helpers listed in scripts/prepare_native.py are imported; no hardware stubs.',
             '15 player profile records imported without equipment/menu code',
+            'Default commander, market control records, QQ16 name digrams imported separately from UI code',
+            'commander_t: APK has 15 equipment bytes (two additional unnamed slots); preserve 92-byte layout',
             'Model registry generated only from uncommented shipheader_t definitions.']}, indent=2) + '\n')
     print(f'Imported geometry, profiles, math, motion and control helpers into {dest}')
 

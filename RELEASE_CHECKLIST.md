@@ -7,9 +7,9 @@ estimate. A successful APK build is not evidence of a working game.
 | --- | --- | --- |
 | 1. Android project / reproducible toolchain | Foundation ready | Gradle, SDK/NDK and prototype APK builds work. |
 | 2. Artifact analysis / source identification | Foundation ready | DEX recovery, native inventories, close AGB source, geometry match, bounded behavioral replay. This does not mean all native code has been reconstructed. |
-| 3. Full rebuilt gameplay core | Partial | Math, seed, autopilot vector routines and ship data work on four ABIs. Remaining game-state systems and full simulation are not connected. |
+| 3. Full rebuilt gameplay core | Partial | Math, movement/controls, seed, ship data, commander/system/market math work on four ABIs. Original universe, combat/AI and full game-state systems are not connected. |
 | 4. Rebuilt graphics | Partial | Mesh preparation validated; separate GLES2/JNI viewer builds. Device GPU testing, sprites, HUD, effects and integration remain. |
-| 5. Connected game loop / menus / controls | Not connected | A bounded Flight test scene exists in `preview`, but the game must reach a playable docked/flight state using only rebuilt code. |
+| 5. Connected game loop / menus / controls | Not connected | Flight and Station test screens exist in `preview` with independent states; they are not a connected docked/flight game. |
 | 6. Saves / sound / Android lifecycle | Not validated | Preserve original saves, connect sound callbacks, implement safe pause/resume and context recreation. |
 | 7. Modern Android runtime matrix | Not performed | Test actual Android 11/13+ and 64-bit-only installs, JNI/GPU behavior and gameplay. |
 | 8. Release packaging / regression | Not ready | Complete gameplay tests, all required native ABIs, appropriate signing, licensing review and release documentation. |

@@ -1,7 +1,7 @@
 {
   "scope": "Non-effect ship meshes, non-distant distances, initially cleared visibility buffers.",
   "original_sha256": "1bdbafd395a016035a60892dba359426987721fec02338c1cc2b603039784360",
-  "packaged_apk_sha256": "fd5d3ef59e590e878034b3974b685f1f49b3c5e55033862633899c9c3ab0bec8",
+  "packaged_apk_sha256": "8f56c3c4bc89f7d7230604a860383d65718ae73bc3211722b62579c4a41fd620",
   "unicorn_version": "2.1.4",
   "random_seed": "0xe117e",
   "models": 66,
@@ -11,7 +11,7 @@
   "abis": {
     "armeabi-v7a": {
       "status": "passed",
-      "sha256": "3d005fa156a91bee7621b56d5e8a90af9b37b0d3acf8e68ca1808d7e62ff5640",
+      "sha256": "12a162d8b4ff4481434f363ea713b3599d0d849d153c933dc696f9f438eab017",
       "checks": {
         "wireframe": 198,
         "solid": 198,
@@ -23,7 +23,7 @@
     },
     "arm64-v8a": {
       "status": "passed",
-      "sha256": "b3d1ea97a539a38f43d4f04b75e6aeb88a6834e7afaca024249832e0684a96d2",
+      "sha256": "3bfc30a88af895ccbe25361d5265cabacee3ccdfbd1661fb27fdc515979b47cf",
       "checks": {
         "wireframe": 198,
         "solid": 198,
@@ -35,7 +35,7 @@
     },
     "x86": {
       "status": "passed",
-      "sha256": "26d9c7b3792ae8feb84dd448ef0ed0c028a5aef3f104da0939f3c0957e9f21f6",
+      "sha256": "8a8107e58c65b2c87500de1d5841aa80e58764320a4ecbdbb59cbdff72e1798e",
       "checks": {
         "wireframe": 198,
         "solid": 198,
@@ -47,7 +47,7 @@
     },
     "x86_64": {
       "status": "passed",
-      "sha256": "b64726b3e848469db731a54be6091a818d4d8031a821a36b336090f44a8680f4",
+      "sha256": "0cc85db49534936a6f8f712fd0b8e070a92daf1cc5ec650f55f88775f67e65d2",
       "checks": {
         "wireframe": 198,
         "solid": 198,
